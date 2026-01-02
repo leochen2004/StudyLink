@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - StudyLink</title>
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/mock-data.js"></script>
+    <style>
+        body {
+            display: flex;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 280px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.5);
+            display: flex;
+            flex-direction: column;
+            padding: 32px 24px;
+            box-sizing: border-box;
+            z-index: 10;
+            box-shadow: 4px 0 24px rgba(0, 0, 0, 0.02);
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--md-sys-color-primary), #bc00dd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 48px;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            padding: 14px 20px;
+            border-radius: 16px;
+            cursor: pointer;
+            color: var(--md-sys-color-on-surface-variant);
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(103, 80, 164, 0.08);
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(103, 80, 164, 0.1), transparent);
+            color: var(--md-sys-color-primary);
+            border-left: 4px solid var(--md-sys-color-primary);
+            border-radius: 4px 16px 16px 4px;
+            /* Unique shape */
+        }
+
+        .user-profile {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 12px;
+        }
+
+        .logout-btn {
+            font-size: 14px;
+            color: var(--md-sys-color-error);
+            cursor: pointer;
+            font-weight: 600;
+            margin-left: auto;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 40px 48px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .header-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .search-bar-container {
+            display: flex;
+            align-items: center;
+            background: white;
+            border-radius: 100px;
+            padding: 6px 6px 6px 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            width: 400px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: box-shadow 0.3s;
+        }
+
+        .search-bar-container:focus-within {
+            box-shadow: 0 4px 25px rgba(103, 80, 164, 0.15);
+            border-color: rgba(103, 80, 164, 0.3);
+        }
+
+        .search-input {
+            border: none;
+            outline: none;
+            flex-grow: 1;
+            font-size: 15px;
+            font-family: inherit;
+        }
+
+        .view-section {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        /* Table Styles */
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 18px 24px;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .data-table th {
+            background: rgba(0, 0, 0, 0.02);
+            font-weight: 600;
+            color: #555;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .notification-badge {
+            background-color: #ff4757;
+            color: white;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(255, 71, 87, 0.4);
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="logo">StudyLink</div>
+        <div class="nav-group">
+            <div class="nav-item active" onclick="showSection('resources', this)">
+                <span>Resource Center</span>
+            </div>
+            <div class="nav-item" onclick="showSection('notifications', this)">
+                <span>Notifications</span>
+                <span id="navBadge" class="notification-badge">0</span>
+            </div>
+            <div class="nav-item" onclick="showSection('qa', this)">
+                <span>Q&A Forum</span>
+            </div>
+            <div class="nav-item" onclick="showSection('my-space', this)">
+                <span>My Space</span>
+            </div>
+            <div class="nav-item" onclick="showSection('profile', this)">
+                <span>Profile</span>
+            </div>
+        </div>
+
+        <div class="user-profile">
+            <div class="user-avatar" id="userAvatar">S</div> <!-- Dynamic Initial -->
+            <div style="font-size:14px; font-weight:600;" id="userFullName">Student</div>
+            <div class="logout-btn" onclick="handleLogout()">Logout</div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <!-- Resource Center -->
+        <div id="resources" class="view-section active">
+            <div class="header-area">
+                <div class="page-title">Explore Resources</div>
+                <div class="search-bar-container">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Search by topic or course...">
+                    <button class="md3-button-filled" style="padding: 10px 24px; border-radius: 100px;"
+                        onclick="searchResources()">Search</button>
+                </div>
+            </div>
+
+            <div id="searchResults"
+                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;">
+                <!-- Content injected here -->
+                <div class="md3-card" style="grid-column: 1/-1; text-align:center; padding: 48px; color:#888;">
+                    Enter a keyword to start your learning journey.
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications -->
+        <div id="notifications" class="view-section">
+            <div class="header-area">
+                <div class="page-title">Notifications</div>
+            </div>
+            <div id="notificationListContainer" style="display:flex; flex-direction:column; gap:16px;">
+                <!-- Filled by JS -->
+            </div>
+        </div>
+
+        <!-- Q&A -->
+        <div id="qa" class="view-section">
+            <div class="header-area">
+                <div class="page-title">Community Q&A</div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
+                <div class="md3-card">
+                    <h3 style="margin-top:0; font-size:20px;">Ask a Question</h3>
+                    <form action="student/question/add" method="POST" enctype="multipart/form-data">
+                        <input type="text" name="title" class="md3-text-field" placeholder="What's your question?"
+                            required>
+                        <textarea name="content" class="md3-text-field" style="height:120px; resize:none;"
+                            placeholder="Describe your question in detail..." required></textarea>
+                        <select name="courseId" id="qaCourseSelect" class="md3-text-field" required>
+                            <option value="" disabled selected>Select Related Course</option>
+                        </select>
+                        <!-- Custom File Upload Button could go here, staying simple for now -->
+                        <div style="margin-bottom:16px;">
+                            <label style="font-size:13px; color:#666; display:block; margin-bottom:8px;">Attach Image
+                                (Optional)</label>
+                            <input type="file" name="image" class="md3-text-field" style="padding:10px;">
+                        </div>
+                        <button type="submit" class="md3-button-filled" style="width:100%">Post Question</button>
+                    </form>
+                </div>
+
+                <div>
+                    <h3 style="margin-top:0; font-size:20px; margin-bottom:16px;">Your Questions</h3>
+                    <div style="display:flex; gap:8px; margin-bottom:16px;">
+                        <input type="text" id="qSearchInput" class="md3-text-field" placeholder="Search questions..."
+                            style="margin:0; flex-grow:1;">
+                        <button class="md3-button-outlined" onclick="searchQuestions()">Search</button>
+                    </div>
+                    <div id="myQuestionsList" style="display:flex; flex-direction:column; gap:16px;">
+                        <!-- List -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Space -->
+        <div id="my-space" class="view-section">
+            <div class="header-area">
+                <div class="page-title">My Dashboard</div>
+            </div>
+
+            <div class="md3-card" style="margin-bottom: 32px;">
+                <h3 style="margin-top:0;">Upload New Resource</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                    <form id="uploadForm" action="student/resource/upload" method="POST" enctype="multipart/form-data"
+                        style="grid-column: 1/-1; display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                        <div style="grid-column: 1 / -1">
+                            <input type="text" name="title" id="upTitle" class="md3-text-field"
+                                placeholder="Resource Title" required>
+                        </div>
+                        <div>
+                            <select name="courseId" id="uploadCourseSelect" class="md3-text-field" required>
+                                <option value="" disabled selected>Select Course</option>
+                            </select>
+                        </div>
+                        <div>
+                            <input type="file" name="file" class="md3-text-field" style="padding:10px;" required>
+                        </div>
+                        <div style="grid-column: 1 / -1">
+                            <textarea name="description" id="upDesc" class="md3-text-field" style="height:80px;"
+                                placeholder="Description"></textarea>
+                        </div>
+                        <div style="grid-column: 1 / -1; text-align: right;">
+                            <button type="submit" class="md3-button-filled">Upload Resource</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <h3 style="font-size:20px;">My Resources</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="border-top-left-radius: 12px;">Title</th>
+                        <th>Status</th>
+                        <th>Downloads</th>
+                        <th style="border-top-right-radius: 12px;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="myResourcesTable"></tbody>
+            </table>
+        </div>
+
+        <!-- Profile -->
+        <div id="profile" class="view-section">
+            <div class="header-area">
+                <div class="page-title">My Profile</div>
+            </div>
+            <div class="md3-card" style="max-width: 600px;">
+                <form action="auth/update" method="POST">
+                    <div style="display:grid; gap:16px;">
+                        <div>
+                            <label style="display:block; margin-bottom:8px; font-weight:600;">Full Name</label>
+                            <input type="text" name="fullName" id="pFullName" class="md3-text-field" required>
+                        </div>
+                        <div>
+                            <label style="display:block; margin-bottom:8px; font-weight:600;">Email</label>
+                            <input type="email" name="email" id="pEmail" class="md3-text-field" required>
+                        </div>
+                        <div>
+                            <label style="display:block; margin-bottom:8px; font-weight:600;">Title / Tagline</label>
+                            <input type="text" name="title" id="pTitle" class="md3-text-field"
+                                placeholder="e.g. 2nd Year CS Student">
+                        </div>
+                        <div>
+                            <label style="display:block; margin-bottom:8px; font-weight:600;">Bio</label>
+                            <textarea name="bio" id="pBio" class="md3-text-field"
+                                style="height:100px; resize:none;"></textarea>
+                        </div>
+                        <div style="border-top:1px solid #eee; margin-top:8px; padding-top:16px;">
+                            <label style="display:block; margin-bottom:8px; font-weight:600;">New Password
+                                (Optional)</label>
+                            <input type="password" name="password" class="md3-text-field"
+                                placeholder="Leave blank to keep current">
+                        </div>
+                        <button type="submit" class="md3-button-filled" style="margin-top:8px;">Update Profile</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check for local file execution to warn about logout
+        function handleLogout() {
+            if (window.location.protocol === 'file:') {
+                MockAPI.logout(); // Use MockAPI logout
+                window.location.href = 'index.html';
+            } else {
+                location.href = 'auth/logout';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            // Auto-refresh every 3 seconds to simulate real-time sync
+            setInterval(loadData, 3000);
+        });
+
+        function loadData() {
+            // Mock data if file protocol for UI testing
+            if (window.location.protocol === 'file:') {
+                console.log("Running in local file mode (Mock Data)");
+                mockPopulate();
+                return;
+            }
+
+            fetch('student/dashboard_data')
+                .then(res => res.json())
+                .then(data => {
+                    updateUI(data);
+                })
+                .catch(err => console.error("Error loading data", err));
+        }
+
+        function updateUI(data) {
+            // Notifications
+            // Notifications
+            if (data.notifications > 0) {
+                const bad = document.getElementById('navBadge');
+                bad.style.display = 'inline-block';
+                bad.textContent = data.notifications;
+            } else {
+                document.getElementById('navBadge').style.display = 'none';
+            }
+
+            const notifList = document.getElementById('notificationListContainer');
+            if (notifList) {
+                notifList.innerHTML = '';
+                if (data.notificationList && data.notificationList.length > 0) {
+                    data.notificationList.forEach(n => {
+                        notifList.innerHTML += `
+                        <div class="md3-card" style="border-left: 4px solid ${n.isRead ? '#ccc' : '#ff4757'};">
+                            <div style="font-weight:bold; margin-bottom:4px;">${n.message}</div>
+                            <div style="font-size:12px; color:grey; margin-bottom:8px;">${n.createdAt}</div>
+                            ${n.link ? `<a href="#" onclick="showSection('qa', null); return false;" style="font-size:13px; color:var(--md-sys-color-primary);">View Details</a>` : ''}
+                        </div>`;
+                    });
+                } else {
+                    notifList.innerHTML = '<div style="color:grey; text-align:center;">No notifications.</div>';
+                }
+            }
+
+            // Populate Selects
+            const qaSel = document.getElementById('qaCourseSelect');
+            const upSel = document.getElementById('uploadCourseSelect');
+            // Clear first to prevent dupes if reloaded, though simple innerHTML ref works
+            qaSel.innerHTML = '<option value="" disabled selected>Select Related Course</option>';
+            upSel.innerHTML = '<option value="" disabled selected>Select Course</option>';
+
+            data.allCourses.forEach(c => {
+                let opt1 = document.createElement('option'); opt1.value = c.id; opt1.textContent = c.name;
+                let opt2 = opt1.cloneNode(true);
+                qaSel.appendChild(opt1);
+                upSel.appendChild(opt2);
+            });
+
+            // My Resources
+            const tb = document.getElementById('myResourcesTable');
+            tb.innerHTML = '';
+            data.myResources.forEach(r => {
+                tb.innerHTML += `<tr>
+                    <td><div style="font-weight:600;">${r.title}</div></td>
+                    <td><span style="padding:4px 12px; border-radius:100px; background:#e0e0e0; font-size:12px; font-weight:500;">${r.status}</span></td>
+                    <td>${r.downloadCount}</td>
+                    <td>
+                        <div style="display:flex; gap:8px;">
+                            <div style="color:var(--md-sys-color-primary); cursor:pointer; font-weight:600;" onclick="handleDownload(${r.id})">Download</div>
+                            <div style="color:var(--md-sys-color-error); cursor:pointer; font-weight:600;" onclick="deleteResource(${r.id})">Delete</div>
+                        </div>
+                    </td>
+                </tr>`;
+            });
+
+            // My Questions
+            const qList = document.getElementById('myQuestionsList');
+            qList.innerHTML = '';
+            data.myQuestions.forEach(q => {
+                let ansHtml = 'No answers yet';
+                if (q.answers && q.answers.length > 0) {
+                    ansHtml = q.answers.map(a => `<div style="margin-top:8px; padding:8px; background:rgba(0,0,0,0.02); border-left:2px solid var(--md-sys-color-primary);"><b>${a.teacherName}:</b> ${a.content}</div>`).join('');
+                }
+
+                qList.innerHTML += `
+                <div class="md3-card" style="padding: 20px; border-left: 5px solid var(--md-sys-color-primary);">
+                    <div style="display:flex; justify-content:space-between; align-items:start;">
+                        <div style="font-weight:700; font-size:16px; margin-bottom:4px;">${q.title}</div>
+                        <button class="md3-button-outlined" style="color:var(--md-sys-color-error); border-color:var(--md-sys-color-error); padding:4px 12px; font-size:12px; height:28px;" onclick="deleteQuestion(${q.id})">Delete</button>
+                    </div>
+                    <div style="color:grey; font-size:13px; margin-bottom:12px;">${q.courseName}</div>
+                    <div style="margin-top:8px;">${ansHtml}</div>
+                </div>`;
+            });
+
+            // Populate Profile
+            if (data.user) {
+                document.getElementById('pFullName').value = data.user.fullName || '';
+                document.getElementById('pEmail').value = data.user.email || '';
+                document.getElementById('pTitle').value = data.user.title || '';
+                document.getElementById('pBio').value = data.user.bio || '';
+                // Updates header as well
+                document.getElementById('userFullName').textContent = data.user.fullName || 'Student';
+            }
+        }
+
+        function mockPopulate() {
+            const user = MockAPI.getCurrentUser();
+            if (!user) { window.location.href = 'index.html'; return; }
+
+            document.getElementById('userAvatar').textContent = user.fullName ? user.fullName.charAt(0) : 'S';
+            document.getElementById('userFullName').textContent = user.fullName || 'Student';
+
+            const data = MockAPI.getStudentDashboard(user.id);
+            updateUI(data);
+
+            // Initial blank search
+            searchResources();
+        }
+
+        function searchResources() {
+            const k = document.getElementById('searchInput').value;
+            if (window.location.protocol === 'file:') {
+                const results = MockAPI.searchResources(k);
+                renderResults(results);
+                return;
+            }
+            // Native fetch...
+            fetch('student/search?keyword=' + encodeURIComponent(k))
+                .then(res => res.json())
+                .then(data => renderResults(data));
+        }
+
+        function renderResults(data) {
+            const resDiv = document.getElementById('searchResults');
+            resDiv.innerHTML = '';
+            if (data.length === 0) {
+                resDiv.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px;">No results found.</div>';
+                return;
+            }
+            data.forEach(r => {
+                resDiv.innerHTML += `
+                 <div class="md3-card">
+                     <div style="font-weight:700; font-size:18px; margin-bottom:8px;">${r.title}</div>
+                     <div style="font-size:13px; color:#777; margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+                         <span style="background:rgba(0,0,0,0.05); padding:2px 8px; border-radius:4px;">${r.courseName}</span>
+                         <span>•</span>
+                         <span>${r.uploaderName}</span>
+                     </div>
+                     <p style="color:#555; line-height:1.5; margin-bottom:20px;">${r.description}</p>
+                     <button class="md3-button-outlined" style="width:100%;" onclick="handleDownload(${r.id})">Download Resource</button>
+                 </div>`;
+            });
+        }
+
+        function handleDownload(id) {
+            if (window.location.protocol === 'file:') {
+                MockAPI.downloadResource(id);
+                alert('Download Simulated! Resource count incremented.');
+                mockPopulate(); // Refresh counts
+            } else {
+                window.open('student/resource/download?id=' + id, '_blank');
+            }
+        }
+
+        function deleteResource(id) {
+            if (!confirm('Delete this resource permanently?')) return;
+            if (window.location.protocol === 'file:') {
+                alert("Mock delete resource");
+                mockPopulate();
+            } else {
+                fetch('student/resource/delete?id=' + id, { method: 'POST' })
+                    .then(() => loadData());
+            }
+        }
+
+        function deleteQuestion(id) {
+            if (!confirm('Are you sure you want to delete this question? This cannot be undone.')) return;
+
+            if (window.location.protocol === 'file:') {
+                MockAPI.deleteQuestion(id);
+                mockPopulate();
+            } else {
+                fetch('student/question/delete?id=' + id, { method: 'POST' })
+                    .then(() => loadData());
+            }
+        }
+        function showSection(id, el) {
+            document.querySelectorAll('.view-section').forEach(d => d.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+
+            // Only toggle class for nav items that are passed
+            if (el) {
+                document.querySelectorAll('.nav-item').forEach(d => d.classList.remove('active'));
+                el.classList.add('active');
+            }
+        }
+
+        function handleLocalQuestion(event) {
+            // Attach this to the form if file protocol
+            if (window.location.protocol === 'file:') {
+                event.preventDefault();
+                const user = MockAPI.getCurrentUser();
+                const q = {
+                    title: event.target.title.value,
+                    content: event.target.content.value,
+                    courseId: event.target.courseId.value,
+                    studentId: user.id,
+                    studentName: user.fullName
+                };
+                MockAPI.addQuestion(q);
+                alert('Question posted successfully!');
+                event.target.reset();
+                mockPopulate();
+                return false;
+            }
+            return true;
+        }
+
+        function handleUpload(event) {
+            if (window.location.protocol === 'file:') {
+                event.preventDefault();
+                const user = MockAPI.getCurrentUser();
+                const r = {
+                    title: document.getElementById('upTitle').value,
+                    description: document.getElementById('upDesc').value,
+                    courseId: document.getElementById('uploadCourseSelect').value,
+                    uploaderId: user.id,
+                    uploaderName: user.fullName
+                };
+                MockAPI.uploadResource(r);
+                alert('Resource uploaded successfully!');
+                event.target.reset();
+                mockPopulate();
+                return false;
+            }
+            return true;
+        }
+
+        if (window.location.protocol === 'file:') {
+            // Hook forms
+            document.querySelector('#qa form').setAttribute('onsubmit', 'return handleLocalQuestion(event)');
+            document.querySelector('#uploadForm').setAttribute('onsubmit', 'return handleUpload(event)');
+        }
+        function searchQuestions() {
+            const keyword = document.getElementById('qSearchInput').value;
+            if (window.location.protocol === 'file:') {
+                alert('Search is not available in mock mode.');
+                return;
+            }
+            fetch('student/question/search?keyword=' + encodeURIComponent(keyword))
+                .then(res => res.json())
+                .then(data => {
+                    const list = document.getElementById('myQuestionsList');
+                    list.innerHTML = '';
+                    if (data.length === 0) {
+                        list.innerHTML = '<div style="padding:16px; text-align:center; color:#666;">No questions found matching your keyword.</div>';
+                        return;
+                    }
+                    data.forEach(q => {
+                        list.innerHTML += `
+                            <div class="md3-card" style="margin-bottom:16px; padding:16px; background:#fff;">
+                                <div style="font-weight:bold; font-size:16px;">${q.title}</div>
+                                <div style="font-size:12px; color:#666; margin-bottom:8px;">
+                                    Course: ${q.courseName} | Student: ${q.studentName || 'Unknown'} | Answers: ${q.answerCount}
+                                </div>
+                                <div style="font-size:14px; margin-top:8px; color:var(--md-sys-color-primary);">Click "Search" again with empty keyword to reset.</div>
+                            </div>
+                        `;
+                    });
+                });
+        }
+    </script>
+</body>
+
+</html>

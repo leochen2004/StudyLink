@@ -1,0 +1,63 @@
+:root {
+    /* MD3 Color Tokens - Purple/Blue Theme */
+    --md-sys-color-primary: #6750A4;
+    --md-sys-color-on-primary: #FFFFFF;
+    --md-sys-color-primary-container: #EADDFF;
+    --md-sys-color-on-primary-container: #21005D;
+
+    --md-sys-color-secondary: #625B71;
+    --md-sys-color-on-secondary: #FFFFFF;
+    --md-sys-color-secondary-container: #E8DEF8;
+    --md-sys-color-on-secondary-container: #1D192B;
+
+    --md-sys-color-tertiary: #7D5260;
+    --md-sys-color-on-tertiary: #FFFFFF;
+    --md-sys-color-tertiary-container: #FFD8E4;
+    --md-sys-color-on-tertiary-container: #31111D;
+
+    --md-sys-color-error: #B3261E;
+    --md-sys-color-on-error: #FFFFFF;
+    --md-sys-color-error-container: #F9DEDC;
+    --md-sys-color-on-error-container: #410E0B;
+
+    --md-sys-color-background: #FFFBFE;
+    --md-sys-color-on-background: #1C1B1F;
+    --md-sys-color-surface: #FFFBFE;
+    --md-sys-color-on-surface: #1C1B1F;
+    
+    --md-sys-color-surface-variant: #E7E0EC;
+    --md-sys-color-on-surface-variant: #49454F;
+    --md-sys-color-outline: #79747E;
+
+    /* Elevations / Shadows */
+    --md-sys-elevation-level1: 0px 1px 2px rgba(0, 0, 0, 0.3), 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+    --md-sys-elevation-level2: 0px 1px 2px rgba(0, 0, 0, 0.3), 0px 2px 6px 2px rgba(0, 0, 0, 0.15);
+    --md-sys-elevation-level3: 0px 1px 3px rgba(0, 0, 0, 0.3), 0px 4px 8px 3px rgba(0, 0, 0, 0.15);
+
+    /* Typography */
+    --md-sys-typescale-display-large-font: 'Roboto', sans-serif;
+    --md-sys-typescale-display-large-size: 57px;
+    --md-sys-typescale-display-large-weight: 400;
+
+    --md-sys-typescale-headline-medium-font: 'Roboto', sans-serif;
+    --md-sys-typescale-headline-medium-size: 28px;
+    --md-sys-typescale-headline-medium-weight: 400;
+
+    --md-sys-typescale-body-large-font: 'Roboto', sans-serif;
+    --md-sys-typescale-body-large-size: 16px;
+    --md-sys-typescale-body-large-weight: 400;
+
+    --md-sys-shape-corner-small: 4px;
+    --md-sys-shape-corner-medium: 12px;
+    --md-sys-shape-corner-large: 16px;
+    --md-sys-shape-corner-extra-large: 28px;
+}
+
+body {
+    background-color: var(--md-sys-color-background);
+    color: var(--md-sys-color-on-background);
+    font-family: var(--md-sys-typescale-body-large-font);
+    font-size: var(--md-sys-typescale-body-large-size);
+    margin: 0;
+    padding: 0;
+}

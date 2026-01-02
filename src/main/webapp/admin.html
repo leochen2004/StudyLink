@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - StudyLink</title>
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body {
+            display: flex;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 280px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.5);
+            display: flex;
+            flex-direction: column;
+            padding: 32px 24px;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--md-sys-color-primary), #bc00dd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 48px;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-item {
+            padding: 14px 20px;
+            border-radius: 16px;
+            cursor: pointer;
+            color: var(--md-sys-color-on-surface-variant);
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.3s;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(103, 80, 164, 0.08);
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(103, 80, 164, 0.1), transparent);
+            color: var(--md-sys-color-primary);
+            border-left: 4px solid var(--md-sys-color-primary);
+            border-radius: 4px 16px 16px 4px;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 40px 48px;
+            overflow-y: auto;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 32px;
+        }
+
+        .md3-card {
+            margin-bottom: 24px;
+            padding: 24px;
+        }
+
+        .view-section {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        /* Table */
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 18px 24px;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .data-table th {
+            background: rgba(0, 0, 0, 0.02);
+            font-weight: 600;
+            color: #555;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        .user-profile {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--md-sys-color-tertiary-container);
+            color: var(--md-sys-color-on-tertiary-container);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="logo">StudyLink <span
+                style="font-size:12px; font-weight:normal; vertical-align:middle; background:#333; color:white; padding:2px 6px; border-radius:4px;">ADMIN</span>
+        </div>
+        <div class="nav-item active" onclick="showSection('courses', this)">Course Management</div>
+        <div class="nav-item" onclick="showSection('teachers', this)">Teacher Management</div>
+        <div class="nav-item" onclick="showSection('resources', this)">Resource Moderation</div>
+        <div class="nav-item" onclick="showSection('questions', this)">Q&A Moderation</div>
+
+        <div class="user-profile">
+            <div class="user-avatar">A</div>
+            <div style="font-size:14px; font-weight:600;">Administrator</div>
+            <div style="font-size:14px; color:var(--md-sys-color-error); cursor:pointer; font-weight:600; margin-left:auto;"
+                onclick="handleLogout()">Logout</div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <!-- Courses -->
+        <div id="courses" class="view-section active">
+            <div class="page-title">Course Management</div>
+            <div class="md3-card">
+                <h3 style="margin-top:0;">Add New Course</h3>
+                <form action="admin/course/add" method="POST" style="display:flex; gap:16px;">
+                    <input type="text" name="name" class="md3-text-field" placeholder="Course Name"
+                        style="margin-bottom:0; flex:1;" required>
+                    <select name="teacherId" id="courseTeacherSelect" class="md3-text-field"
+                        style="margin-bottom:0; flex:1;" required>
+                        <option selected disabled>Select Teacher</option>
+                    </select>
+                    <button type="submit" class="md3-button-filled">Add Course</button>
+                </form>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Course Name</th>
+                        <th>Teacher</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="courseTable"></tbody>
+            </table>
+        </div>
+
+        <!-- Teachers -->
+        <div id="teachers" class="view-section">
+            <div class="page-title">Teacher Management</div>
+            <div class="md3-card">
+                <h3 style="margin-top:0;">Add New Teacher</h3>
+                <form action="admin/teacher/add" method="POST"
+                    style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+                    <input type="text" name="username" class="md3-text-field" placeholder="Username"
+                        style="margin-bottom:0;" required>
+                    <input type="password" name="password" class="md3-text-field" placeholder="Password"
+                        style="margin-bottom:0;" required>
+                    <input type="text" name="fullName" class="md3-text-field" placeholder="Full Name"
+                        style="margin-bottom:0;" required>
+                    <input type="email" name="email" class="md3-text-field" placeholder="Email" style="margin-bottom:0;"
+                        required>
+                    <input type="text" name="title" class="md3-text-field" placeholder="Title (e.g. Professor)"
+                        style="margin-bottom:0;">
+                    <textarea name="bio" class="md3-text-field" placeholder="Bio / Introduction"
+                        style="margin-bottom:0; height:48px;"></textarea>
+                    <button type="submit" class="md3-button-filled" style="grid-column: 1 / -1;">Create Teacher</button>
+                </form>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Full Name</th>
+                    </tr>
+                </thead>
+                <tbody id="teacherTable"></tbody>
+            </table>
+        </div>
+
+        <!-- Resources -->
+        <div id="resources" class="view-section">
+            <div class="page-title">Resource Moderation</div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Uploader</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="resourceTable"></tbody>
+            </table>
+        </div>
+
+        <!-- Questions -->
+        <div id="questions" class="view-section">
+            <div class="page-title">Q&A Moderation</div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Student</th>
+                        <th>Course</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="questionsTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function handleLogout() {
+            if (window.location.protocol === 'file:') {
+                window.location.href = 'index.html'; // Local mock redirect
+            } else {
+                location.href = 'auth/logout';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadData);
+        function loadData() {
+            if (window.location.protocol === 'file:') { mockData(); return; }
+
+            fetch('admin/dashboard_data')
+                .then(res => res.json())
+                .then(data => populate(data));
+        }
+
+        function populate(data) {
+            // Courses
+            const cTable = document.getElementById('courseTable');
+            cTable.innerHTML = '';
+            data.courses.forEach(c => {
+                cTable.innerHTML += `<tr><td>${c.id}</td><td>${c.name}</td><td>${c.teacherName || '-'}</td><td><button class="md3-button-outlined" style="padding:4px 12px; color:red; border-color:red;" onclick="deleteItem('course', ${c.id})">Delete</button></td></tr>`;
+            });
+
+            // Teachers
+            const tTable = document.getElementById('teacherTable');
+            const tSelect = document.getElementById('courseTeacherSelect');
+            tTable.innerHTML = '';
+            tSelect.innerHTML = '<option selected disabled>Select Teacher</option>';
+            data.teachers.forEach(t => {
+                tTable.innerHTML += `<tr><td>${t.id}</td><td>${t.username}</td><td>${t.fullName}</td></tr>`;
+                tSelect.innerHTML += `<option value="${t.id}">${t.fullName} (${t.username})</option>`;
+            });
+
+            // Resources
+            const rTable = document.getElementById('resourceTable');
+            if (data.resources && rTable) {
+                rTable.innerHTML = '';
+                data.resources.forEach(r => {
+                    rTable.innerHTML += `<tr><td>${r.title}</td><td>${r.uploaderName}</td><td>${r.fileType}</td><td>${r.status}</td><td><button class="md3-button-outlined" style="padding:4px 12px; color:red; border-color:red;" onclick="deleteItem('resource', ${r.id})">Delete</button></td></tr>`;
+                });
+            }
+
+            // Questions
+            const qTable = document.getElementById('questionsTable');
+            if (data.questions && qTable) {
+                qTable.innerHTML = '';
+                data.questions.forEach(q => {
+                    qTable.innerHTML += `<tr><td>${q.title}</td><td>${q.studentName}</td><td>${q.courseName}</td><td><button class="md3-button-outlined" style="padding:4px 12px; color:red; border-color:red;" onclick="deleteItem('question', ${q.id})">Delete</button></td></tr>`;
+                });
+            }
+        }
+
+        function mockData() {
+            populate({
+                courses: [{ id: 1, name: "CS101", teacherName: "Dr. Smith" }, { id: 2, name: "MATH200", teacherName: "Prof. Jones" }],
+                teachers: [{ id: 1, username: "teacher1", fullName: "Dr. Smith" }, { id: 2, username: "teacher2", fullName: "Prof. Jones" }],
+                resources: [{ id: 1, title: "Lec 1 Slides", uploaderName: "Dr. Smith", fileType: "PDF", status: "APPROVED" }],
+                questions: [{ id: 1, title: "Integration help", studentName: "Student One", courseName: "MATH200" }]
+            });
+        }
+
+        function deleteItem(type, id) {
+            if (!confirm('Are you sure?')) return;
+            if (window.location.protocol === 'file:') {
+                document.querySelector('tr').remove(); // Visual mock
+                return;
+            }
+            fetch('admin/' + type + '/delete?id=' + id, { method: 'POST' })
+                .then(() => location.reload());
+        }
+
+        function showSection(id, el) {
+            document.querySelectorAll('.view-section').forEach(d => d.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(d => d.classList.remove('active'));
+            el.classList.add('active');
+        }
+    </script>
+</body>
+
+</html>

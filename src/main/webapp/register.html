@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - StudyLink</title>
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/mock-data.js"></script>
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            /* Softer pastel gradient for register */
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 48px;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+        }
+
+        .brand-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 32px;
+            color: #333;
+        }
+
+        .form-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .footer-link {
+            margin-top: 24px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .footer-link a {
+            color: var(--md-sys-color-primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-card">
+        <div class="brand-title">Create Account</div>
+
+        <form action="auth/register" method="POST" onsubmit="return handleLocalRegister(event)">
+            <div class="form-group">
+                <input type="text" name="username" class="md3-text-field" placeholder="Username" required>
+            </div>
+            <div class="form-group">
+                <input type="password" name="password" class="md3-text-field" placeholder="Password" required>
+            </div>
+            <div class="form-group">
+                <input type="text" name="fullName" class="md3-text-field" placeholder="Full Name" required>
+            </div>
+            <div class="form-group">
+                <input type="email" name="email" class="md3-text-field" placeholder="Email Address" required>
+            </div>
+            <div class="form-group">
+                <select name="role" class="md3-text-field">
+                    <option value="STUDENT">Student</option>
+                    <option value="TEACHER">Teacher</option>
+                </select>
+            </div>
+            <button type="submit" class="md3-button-filled"
+                style="width: 100%; padding: 14px; font-size: 16px;">Register</button>
+        </form>
+
+        <div class="footer-link">
+            Already have an account? <a href="index.html">Sign In</a>
+        </div>
+    </div>
+
+    <script>
+        function handleLocalRegister(e) {
+            if (window.location.protocol === 'file:') {
+                e.preventDefault();
+                const form = e.target;
+                const user = {
+                    username: form.username.value,
+                    password: form.password.value,
+                    fullName: form.fullName.value,
+                    email: form.email.value,
+                    role: form.role.value
+                };
+
+                const res = MockAPI.register(user);
+                if (res.success) {
+                    alert('Registration successful! Please login.');
+                    window.location.href = 'index.html';
+                } else {
+                    alert('Registration failed: ' + res.message);
+                }
+                return false;
+            }
+            return true;
+        }
+    </script>
+</body>
+
+</html>

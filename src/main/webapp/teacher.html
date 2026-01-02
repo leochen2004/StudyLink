@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - StudyLink</title>
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body {
+            display: flex;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 280px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.5);
+            display: flex;
+            flex-direction: column;
+            padding: 32px 24px;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--md-sys-color-primary), #bc00dd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 48px;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-item {
+            padding: 14px 20px;
+            border-radius: 16px;
+            cursor: pointer;
+            color: var(--md-sys-color-on-surface-variant);
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.3s;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(103, 80, 164, 0.08);
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(103, 80, 164, 0.1), transparent);
+            color: var(--md-sys-color-primary);
+            border-left: 4px solid var(--md-sys-color-primary);
+            border-radius: 4px 16px 16px 4px;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 40px 48px;
+            overflow-y: auto;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 32px;
+        }
+
+        .md3-card {
+            margin-bottom: 24px;
+            padding: 24px;
+        }
+
+        .view-section {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        .notification-badge {
+            background: #ff4757;
+            color: white;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 11px;
+            display: none;
+        }
+
+        .user-profile {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 12px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 18px 24px;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .data-table th {
+            background: rgba(0, 0, 0, 0.02);
+            font-weight: 600;
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="logo">StudyLink <span
+                style="font-size:12px; font-weight:normal; vertical-align:middle; background:#6750a4; color:white; padding:2px 6px; border-radius:4px;">TEACHER</span>
+        </div>
+        <div class="nav-item active" onclick="showSection('overview', this)">Overview</div>
+        <div class="nav-item" onclick="showSection('publish', this)">Publish Resource</div>
+        <div class="nav-item" onclick="showSection('qa', this)">
+            <span>Q&A Management</span>
+            <span id="qaBadge" class="notification-badge">0</span>
+        </div>
+
+        <div class="user-profile">
+            <div class="user-avatar">T</div>
+            <div style="font-size:14px; font-weight:600;">Instructor</div>
+            <div style="font-size:14px; color:var(--md-sys-color-error); cursor:pointer; font-weight:600; margin-left:auto;"
+                onclick="handleLogout()">Logout</div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <!-- Overview -->
+        <div id="overview" class="view-section active">
+            <div class="page-title">Teacher Overview</div>
+            <div class="md3-card">
+                <h3>My Courses</h3>
+                <ul id="courseList" style="list-style:none; padding:0;"></ul>
+            </div>
+        </div>
+
+        <!-- Publish -->
+        <div id="publish" class="view-section">
+            <div class="page-title">Publish Resource</div>
+            <div class="md3-card">
+                <form action="teacher/resource/add" method="POST" enctype="multipart/form-data">
+                    <input type="text" name="title" class="md3-text-field" placeholder="Resource Title" required>
+                    <textarea name="description" class="md3-text-field" placeholder="Description"
+                        style="height:100px;"></textarea>
+                    <div style="display:flex; gap:16px;">
+                        <select name="courseId" id="publishCourseSelect" class="md3-text-field" required>
+                            <option value="" disabled selected>Select Course</option>
+                        </select>
+                        <select name="visibility" class="md3-text-field">
+                            <option value="PUBLIC">Public (All Students)</option>
+                            <option value="PRIVATE">Private (Class Only)</option>
+                        </select>
+                    </div>
+                    <input type="file" name="file" class="md3-text-field" style="padding:10px;" required>
+                    <button type="submit" class="md3-button-filled">Publish</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Q&A -->
+        <div id="qa" class="view-section">
+            <div class="page-title">Q&A Management</div>
+            <div style="margin-bottom:20px; border-bottom:1px solid #ddd;">
+                <button class="md3-button-outlined" onclick="toggleQaTab('unanswered')" id="tab-unanswered"
+                    style="border-radius:0; border:none; border-bottom:2px solid var(--md-sys-color-primary);">Pending</button>
+                <button class="md3-button-outlined" onclick="toggleQaTab('history')" id="tab-history"
+                    style="border-radius:0; border:none; color:grey;">History</button>
+            </div>
+
+            <div id="unansweredList" style="display:flex; flex-direction:column; gap:16px;"></div>
+            <div id="historyList" style="display:none; flex-direction:column; gap:16px;"></div>
+        </div>
+    </div>
+
+    <!-- Answer Modal -->
+    <div id="answerModal"
+        style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; z-index:100;">
+        <div class="md3-card" style="width:500px; background:white;">
+            <h3>Answer Question</h3>
+            <form action="teacher/question/answer" method="POST">
+                <input type="hidden" name="questionId" id="modalQId">
+                <p id="modalQTitle" style="font-weight:bold;"></p>
+                <textarea name="content" class="md3-text-field" style="height:150px;" placeholder="Write your answer..."
+                    required></textarea>
+                <div style="text-align:right;">
+                    <button type="button" class="md3-button-outlined" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="md3-button-filled">Submit Answer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function handleLogout() {
+            if (window.location.protocol === 'file:') {
+                window.location.href = 'index.html';
+            } else {
+                location.href = 'auth/logout';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            setInterval(loadData, 3000); // Real-time sync
+        });
+        function loadData() {
+            if (window.location.protocol === 'file:') { mockData(); return; }
+            fetch('teacher/dashboard_data').then(res => res.json()).then(data => populate(data));
+        }
+
+        function populate(data) {
+            // Courses
+            const cl = document.getElementById('courseList');
+            const ps = document.getElementById('publishCourseSelect');
+            cl.innerHTML = '';
+            ps.innerHTML = '<option disabled selected>Select Course</option>';
+            data.courses.forEach(c => {
+                cl.innerHTML += `<li style="padding:12px; border-bottom:1px solid #eee;"><b>${c.name}</b></li>`;
+                ps.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+            });
+
+            // Questions
+            const ql = document.getElementById('unansweredList');
+            ql.innerHTML = '';
+            const count = data.unansweredQuestions.length;
+            if (count > 0) {
+                document.getElementById('qaBadge').style.display = 'inline-block';
+                document.getElementById('qaBadge').textContent = count;
+            }
+
+            data.unansweredQuestions.forEach(q => {
+                ql.innerHTML += `
+               <div class="md3-card">
+                   <div style="font-weight:bold; font-size:18px;">${q.title}</div>
+                   <div style="color:grey; font-size:13px; margin-bottom:12px;">Student: ${q.studentName} | Course: ${q.courseName}</div>
+                   <p>${q.content}</p>
+                   <button class="md3-button-filled" onclick="openModal(${q.id}, '${q.title.replace(/'/g, "\\'")}')">Answer</button>
+               </div>`;
+            });
+
+            // Questions (History)
+            const hl = document.getElementById('historyList');
+            if (hl) {
+                hl.innerHTML = '';
+                if (data.answeredQuestions) {
+                    data.answeredQuestions.forEach(q => {
+                        // Safe access to first answer or loop
+                        let ansText = (q.answers && q.answers.length > 0) ? q.answers[0].content : '...';
+                        let ansId = (q.answers && q.answers.length > 0) ? q.answers[0].id : 0;
+
+                        hl.innerHTML += `
+                        <div class="md3-card" style="border-left:4px solid #4caf50;">
+                            <div style="font-weight:bold;">${q.title}</div>
+                            <div style="font-size:12px; color:grey;">Student: ${q.studentName}</div>
+                            <div style="background:#f9f9f9; padding:8px; margin-top:8px; border-radius:8px;">
+                                <b>Your Answer:</b> ${ansText}
+                            </div>
+                            <div style="margin-top:8px; text-align:right;">
+                                <button class="md3-button-outlined" style="color:red; border-color:red; font-size:12px;" onclick="handleDeleteAnswer(${ansId})">Delete Answer</button>
+                            </div>
+                        </div>`;
+                    });
+                }
+            }
+        }
+
+        function mockData() {
+            const user = MockAPI.getCurrentUser();
+            if (!user) { window.location.href = 'index.html'; return; }
+            document.querySelector('.user-profile div:nth-child(2)').textContent = user.fullName;
+
+            // Should add getAnsweredQuestions logic to MockAPI or filter here
+            const allQs = JSON.parse(localStorage.getItem('sl_questions')) || [];
+            // Filter answered: Has answers
+            const answered = allQs.filter(q => q.answers && q.answers.length > 0);
+
+            const data = MockAPI.getTeacherDashboard(user.id);
+            data.answeredQuestions = answered; // Augment data
+
+            populate(data);
+        }
+
+        function handleDeleteAnswer(ansId) {
+            if (!confirm("Recall this answer?")) return;
+            if (window.location.protocol === 'file:') {
+                alert("Cannot delete in local mock mode without finding the question ID logic override.");
+                return;
+            }
+            fetch('teacher/answer/delete?id=' + ansId, { method: 'POST' })
+                .then(() => loadData());
+        }
+
+        function toggleQaTab(tab) {
+            document.getElementById('unansweredList').style.display = tab === 'unanswered' ? 'flex' : 'none';
+            document.getElementById('historyList').style.display = tab === 'history' ? 'flex' : 'none';
+
+            document.getElementById('tab-unanswered').style.color = tab === 'unanswered' ? 'var(--md-sys-color-primary)' : 'grey';
+            document.getElementById('tab-unanswered').style.borderBottom = tab === 'unanswered' ? '2px solid var(--md-sys-color-primary)' : 'none';
+
+            document.getElementById('tab-history').style.color = tab === 'history' ? 'var(--md-sys-color-primary)' : 'grey';
+            document.getElementById('tab-history').style.borderBottom = tab === 'history' ? '2px solid var(--md-sys-color-primary)' : 'none';
+        }
+
+        function showSection(id, el) {
+            document.querySelectorAll('.view-section').forEach(d => d.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(d => d.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function openModal(id, title) {
+            document.getElementById('modalQId').value = id;
+            document.getElementById('modalQTitle').textContent = title;
+            document.getElementById('answerModal').style.display = 'flex';
+        }
+        function closeModal() {
+            document.getElementById('answerModal').style.display = 'none';
+        }
+    </script>
+</body>
+
+</html>
