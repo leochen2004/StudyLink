@@ -1,117 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - StudyLink</title>
-    <link rel="stylesheet" href="css/variables.css">
-    <link rel="stylesheet" href="css/styles.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>登录 - StudyLink</title>
+    <link rel="stylesheet" href="css/variables.css" />
+    <link rel="stylesheet" href="css/styles.css" />
     <script src="js/mock-data.js"></script>
     <style>
-        body {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
 
-        .login-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            padding: 48px;
-            border-radius: 24px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
+      .login-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        padding: 48px;
+        border-radius: 24px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+      }
 
-        .brand-title {
-            font-size: 36px;
-            font-weight: 800;
-            margin-bottom: 8px;
-            background: linear-gradient(135deg, var(--md-sys-color-primary), #bc00dd);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+      .brand-title {
+        font-size: 36px;
+        font-weight: 800;
+        margin-bottom: 8px;
+        background: linear-gradient(
+          135deg,
+          var(--md-sys-color-primary),
+          #bc00dd
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
 
-        .brand-subtitle {
-            color: #666;
-            font-size: 16px;
-            margin-bottom: 40px;
-        }
+      .brand-subtitle {
+        color: #666;
+        font-size: 16px;
+        margin-bottom: 40px;
+      }
 
-        .form-group {
-            text-align: left;
-            margin-bottom: 20px;
-        }
+      .form-group {
+        text-align: left;
+        margin-bottom: 20px;
+      }
 
-        .footer-link {
-            margin-top: 24px;
-            font-size: 14px;
-            color: #666;
-        }
+      .footer-link {
+        margin-top: 24px;
+        font-size: 14px;
+        color: #666;
+      }
 
-        .footer-link a {
-            color: var(--md-sys-color-primary);
-            text-decoration: none;
-            font-weight: 600;
-        }
+      .footer-link a {
+        color: var(--md-sys-color-primary);
+        text-decoration: none;
+        font-weight: 600;
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
     <div class="login-card">
-        <div class="brand-title">StudyLink</div>
-        <div class="brand-subtitle">University Resource Sharing Platform</div>
+      <div class="brand-title">StudyLink</div>
+      <div class="brand-subtitle">大学资源共享平台</div>
 
-        <form action="auth/login" method="POST" onsubmit="return handleLocalLogin(event)">
-            <div class="form-group">
-                <input type="text" name="username" id="username" class="md3-text-field" placeholder="Username" required>
-            </div>
-            <div class="form-group">
-                <input type="password" name="password" class="md3-text-field" placeholder="Password" required>
-            </div>
-            <div class="form-group">
-                <select name="role" id="roleSelect" class="md3-text-field">
-                    <option value="STUDENT">Student</option>
-                    <option value="TEACHER">Teacher</option>
-                    <option value="ADMIN">Administrator</option>
-                </select>
-            </div>
-            <button type="submit" class="md3-button-filled" style="width: 100%; padding: 14px; font-size: 16px;">Sign
-                In</button>
-        </form>
-
-        <div class="footer-link">
-            Don't have an account? <a href="register.html">Sign up now</a>
+      <form
+        action="auth/login"
+        method="POST"
+        onsubmit="return handleLocalLogin(event)"
+      >
+        <div class="form-group">
+          <input
+            type="text"
+            name="username"
+            id="username"
+            class="md3-text-field"
+            placeholder="用户名"
+            required
+          />
         </div>
+        <div class="form-group">
+          <input
+            type="password"
+            name="password"
+            class="md3-text-field"
+            placeholder="密码"
+            required
+          />
+        </div>
+
+        <button
+          type="submit"
+          class="md3-button-filled"
+          style="width: 100%; padding: 14px; font-size: 16px"
+        >
+          登录
+        </button>
+      </form>
+
+      <div class="footer-link">
+        还没有账号？ <a href="register.html">立即注册</a>
+      </div>
     </div>
 
     <script>
-        function handleLocalLogin(e) {
-            if (window.location.protocol === 'file:') {
-                e.preventDefault();
-                const u = document.getElementById('username').value;
-                const p = document.querySelector('input[type="password"]').value;
-                const role = document.getElementById('roleSelect').value;
+      function handleLocalLogin(e) {
+        if (window.location.protocol === "file:") {
+          e.preventDefault();
+          const u = document.getElementById("username").value;
+          const p = document.querySelector('input[type="password"]').value;
+          
+          // For local file testing, we'll try to guess or use a default, 
+          // or ideally MockAPI should handle it. 
+          // Since we removed the selector, let's try to login as STUDENT by default for local testing
+          // or check if username contains 'admin' or 'teacher'.
+          let role = "STUDENT";
+          if (u.includes("admin")) role = "ADMIN";
+          else if (u.includes("teacher")) role = "TEACHER";
 
-                const res = MockAPI.login(u, p, role);
-                if (res.success) {
-                    if (role === 'ADMIN') window.location.href = 'admin.html';
-                    else if (role === 'TEACHER') window.location.href = 'teacher.html';
-                    else window.location.href = 'student.html';
-                } else {
-                    alert('Login Failed: ' + res.message);
-                }
+          const res = MockAPI.login(u, p, role);
+          if (res.success) {
+            if (role === "ADMIN") window.location.href = "admin.html";
+            else if (role === "TEACHER") window.location.href = "teacher.html";
+            else window.location.href = "student.html";
+          } else {
+            alert("登录失败: " + res.message);
+          }
 
-                return false;
-            }
-            return true;
+          return false;
         }
+        return true;
+      }
     </script>
-</body>
-
+  </body>
 </html>

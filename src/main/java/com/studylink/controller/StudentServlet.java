@@ -19,6 +19,7 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.Part;
 import java.io.IOException;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.UUID;
 
 @WebServlet("/student/*")
@@ -76,6 +77,7 @@ public class StudentServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.setCharacterEncoding("UTF-8");
         User user = checkStudent(req, resp);
         if (user == null)
             return;
@@ -83,6 +85,8 @@ public class StudentServlet extends HttpServlet {
         String pathInfo = req.getPathInfo();
         if ("/resource/upload".equals(pathInfo)) {
             uploadResource(req, resp, user);
+        } else if ("/course/enroll".equals(pathInfo)) {
+            enrollCourse(req, resp, user);
         } else if ("/question/add".equals(pathInfo)) {
             askQuestion(req, resp, user);
         } else if ("/question/delete".equals(pathInfo)) {
@@ -126,12 +130,41 @@ public class StudentServlet extends HttpServlet {
         resp.sendRedirect(req.getContextPath() + "/student.html");
     }
 
+    private void enrollCourse(HttpServletRequest req, HttpServletResponse resp, User user) throws IOException {
+        String courseIdStr = req.getParameter("courseId");
+        if (courseIdStr != null) {
+            try {
+                int courseId = Integer.parseInt(courseIdStr);
+                courseDAO.enrollStudent(courseId, user.getId());
+                resp.getWriter().write("{\"success\":true}");
+                return;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        resp.sendRedirect(req.getContextPath() + "/student.html");
+    }
+
     private void getDashboardData(HttpServletRequest req, HttpServletResponse resp, User user) throws IOException {
         int unread = notificationDAO.getUnreadCount(user.getId());
         List<com.studylink.model.Notification> notificationList = notificationDAO.getNotifications(user.getId());
         List<Resource> myResources = resourceDAO.getResourcesByUploader(user.getId());
         List<Question> myQuestions = questionDAO.getQuestionsByStudent(user.getId());
-        List<Course> allCourses = courseDAO.getAllCourses(); // For creating questions/uploads
+
+        List<Course> enrolledCourses = courseDAO.getEnrolledCourses(user.getId());
+        List<Course> allCourses = courseDAO.getAllCourses();
+
+        // available = all - enrolled
+        List<Integer> enrolledIds = new ArrayList<>();
+        for (Course c : enrolledCourses)
+            enrolledIds.add(c.getId());
+
+        List<Course> availableCourses = new ArrayList<>();
+        for (Course c : allCourses) {
+            if (!enrolledIds.contains(c.getId())) {
+                availableCourses.add(c);
+            }
+        }
 
         StringBuilder json = new StringBuilder();
         json.append("{");
@@ -196,11 +229,22 @@ public class StudentServlet extends HttpServlet {
         }
         json.append("],");
 
-        json.append("\"allCourses\": [");
-        for (int i = 0; i < allCourses.size(); i++) {
-            Course c = allCourses.get(i);
-            json.append(String.format("{\"id\":%d, \"name\":\"%s\"}", c.getId(), c.getName()));
-            if (i < allCourses.size() - 1)
+        json.append("\"enrolledCourses\": [");
+        for (int i = 0; i < enrolledCourses.size(); i++) {
+            Course c = enrolledCourses.get(i);
+            json.append(String.format("{\"id\":%d, \"name\":\"%s\", \"teacherName\":\"%s\"}", c.getId(), c.getName(),
+                    c.getTeacherName()));
+            if (i < enrolledCourses.size() - 1)
+                json.append(",");
+        }
+        json.append("],");
+
+        json.append("\"availableCourses\": [");
+        for (int i = 0; i < availableCourses.size(); i++) {
+            Course c = availableCourses.get(i);
+            json.append(String.format("{\"id\":%d, \"name\":\"%s\", \"teacherName\":\"%s\"}", c.getId(), c.getName(),
+                    c.getTeacherName()));
+            if (i < availableCourses.size() - 1)
                 json.append(",");
         }
         json.append("]");
@@ -214,35 +258,30 @@ public class StudentServlet extends HttpServlet {
 
     private void searchResources(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String keyword = req.getParameter("keyword");
-        List<Resource> resources = resourceDAO.searchResources(keyword != null ? keyword : "");
+        User user = checkStudent(req, resp); // Ensure user is logged in for visibility check
+        if (user == null)
+            return;
+
+        List<Resource> resources = resourceDAO.getStudentVisibleResources(user.getId());
+
+        // Filter in memory by keyword
+        List<Resource> filtered = new ArrayList<>();
+        String k = (keyword != null ? keyword.toLowerCase() : "");
+        for (Resource r : resources) {
+            if (r.getTitle().toLowerCase().contains(k) || r.getDescription().toLowerCase().contains(k)) {
+                filtered.add(r);
+            }
+        }
 
         StringBuilder json = new StringBuilder();
         json.append("[");
-        for (int i = 0; i < resources.size(); i++) {
-            Resource r = resources.get(i);
-            // Check visibility? Admin/Teacher sets visibility.
-            // If PRIVATE, only students in that course?
-            // Requirement: "Student Resource Browsing: Browse by course / Global Search".
-            // Requirement implies visibility check.
-            // Simplified: If PUBLIC, show. If PRIVATE, check enrollment? Schema doesn't
-            // have enrollment table.
-            // Requirement: "Teacher sets visibility: [Only Class Students] or [All
-            // Students]".
-            // Without `enrollments` table, "Only Class Students" is hard to verify.
-            // I'll assume for this design: PUBLIC = All. PRIVATE = Hidden from global
-            // search?
-            // Or since I don't have enrollment logic, I will show ALL for now or assume all
-            // students "belong" to the college.
-            // I'll show only PUBLIC resources in search.
-
-            if ("PRIVATE".equals(r.getVisibility()))
-                continue;
-
+        for (int i = 0; i < filtered.size(); i++) {
+            Resource r = filtered.get(i);
             json.append(String.format(
                     "{\"id\":%d, \"title\":\"%s\", \"uploaderName\":\"%s\", \"courseName\":\"%s\", \"description\":\"%s\", \"downloadCount\":%d}",
                     r.getId(), r.getTitle(), r.getUploaderName(), r.getCourseName(), r.getDescription(),
                     r.getDownloadCount()));
-            if (i < resources.size() - 1)
+            if (i < filtered.size() - 1)
                 json.append(",");
         }
         json.append("]");
@@ -254,43 +293,57 @@ public class StudentServlet extends HttpServlet {
 
     private void uploadResource(HttpServletRequest req, HttpServletResponse resp, User user)
             throws IOException, ServletException {
-        // Similar to Teacher upload
+        req.setCharacterEncoding("UTF-8");
         String title = req.getParameter("title");
-        String desc = req.getParameter("description");
+        String description = req.getParameter("description");
         int courseId = Integer.parseInt(req.getParameter("courseId"));
 
-        String filePath = "uploads/student_dummy.pdf";
-        String fileType = "PDF";
+        // Use absolute path to ensure files are saved in the project source directory
+        // and persist across restarts/builds.
+        String uploadPath = "/Users/liangchen0920/workspace/webDev/StudyLink/src/main/webapp/uploads";
+        java.io.File uploadDir = new java.io.File(uploadPath);
+        if (!uploadDir.exists())
+            uploadDir.mkdirs();
 
+        String filePath = "";
+        String fileType = "FILE";
+
+        String savedFileName = "";
         try {
             Part filePart = req.getPart("file");
             if (filePart != null && filePart.getSize() > 0) {
                 String fileName = getSubmittedFileName(filePart);
-                filePath = "uploads/" + UUID.randomUUID().toString() + "_" + fileName;
+                String uuid = UUID.randomUUID().toString();
+                savedFileName = uuid + "_" + fileName;
+                filePath = uploadPath + java.io.File.separator + savedFileName;
+
+                // Write file to disk
+                filePart.write(filePath);
+
+                // Store relative path or identifying info?
+                // Storing absolute path for simplicity in this session,
+                // or just the filename if we always recreate the dir path.
+                // Let's store the full path to avoid ambiguity in download.
+
                 if (fileName.toLowerCase().endsWith(".png") || fileName.toLowerCase().endsWith(".jpg"))
                     fileType = "IMAGE";
                 else if (fileName.toLowerCase().endsWith(".zip"))
                     fileType = "ZIP";
-                else
+                else if (fileName.toLowerCase().endsWith(".pdf"))
                     fileType = "PDF";
             }
         } catch (Exception e) {
+            e.printStackTrace();
         }
 
         Resource r = new Resource();
         r.setTitle(title);
-        r.setDescription(desc);
+        r.setDescription(description);
         r.setCourseId(courseId);
         r.setUploaderId(user.getId());
-        r.setFilePath(filePath);
+        r.setFilePath("uploads/" + savedFileName); // Store relative path for portability
         r.setFileType(fileType);
-        r.setVisibility("PUBLIC"); // Students defaulted to Public or Admin review? Schema has status. Auto
-                                   // PENDING/APPROVED?
-        r.setStatus("PENDING"); // Students uploads usually need approval or safe default. I'll set PENDING or
-                                // APPROVED. Let's say APPROVED for smooth demo, or PENDING if moderation is
-                                // strict.
-        // Task "Resource Control: Admin delete ...". "Student Upload ...".
-        // I'll set APPROVED for simplicity unless "audit" is strict.
+        r.setVisibility("PUBLIC");
         r.setStatus("APPROVED");
 
         resourceDAO.addResource(r);
@@ -329,14 +382,113 @@ public class StudentServlet extends HttpServlet {
         if (idStr != null) {
             try {
                 int id = Integer.parseInt(idStr);
-                resourceDAO.incrementDownloadCount(id);
-                // In a real scenario, serve the file. Here we just acknowledge.
-                resp.setContentType("text/plain");
-                resp.getWriter().write("Download started for resource " + id);
+
+                // Security Check: Verify User
+                User user = checkStudent(req, resp);
+                if (user == null) {
+                    // checkStudent handles redirect/error
+                    return;
+                }
+
+                Resource r = resourceDAO.getResourceById(id);
+
+                if (r != null) {
+                    // Security Check: Visibility
+                    if ("PRIVATE".equals(r.getVisibility())) {
+                        List<Course> enrolled = courseDAO.getEnrolledCourses(user.getId());
+                        boolean isEnrolled = false;
+                        for (Course c : enrolled) {
+                            if (c.getId() == r.getCourseId()) {
+                                isEnrolled = true;
+                                break;
+                            }
+                        }
+                        if (!isEnrolled) {
+                            resp.sendError(HttpServletResponse.SC_FORBIDDEN,
+                                    "Access Denied: You must be enrolled in this course.");
+                            return;
+                        }
+                    }
+
+                    resourceDAO.incrementDownloadCount(id);
+
+                    if (r.getFilePath() != null && !r.getFilePath().isEmpty()) {
+                        java.io.File file;
+                        if (r.getFilePath().startsWith("uploads")) {
+                            // Resolve relative path
+                            String projectRoot = System.getProperty("user.dir");
+                            String webappRoot = projectRoot + java.io.File.separator + "src" + java.io.File.separator
+                                    + "main" + java.io.File.separator + "webapp";
+                            file = new java.io.File(webappRoot, r.getFilePath());
+                        } else {
+                            // Legacy absolute path support
+                            file = new java.io.File(r.getFilePath());
+                        }
+
+                        if (file.exists()) {
+                            String mimeType = getServletContext().getMimeType(file.getAbsolutePath());
+                            if (mimeType == null)
+                                mimeType = "application/octet-stream";
+
+                            resp.setContentType(mimeType);
+                            resp.setContentLength((int) file.length());
+
+                            // Extract original filename for download
+                            String originalName = file.getName();
+                            // UUID_Filename -> Filename
+                            int underscoreIndex = originalName.indexOf('_');
+                            if (underscoreIndex != -1) {
+                                originalName = originalName.substring(underscoreIndex + 1);
+                            }
+
+                            String headerKey = "Content-Disposition";
+                            // Encode filename for browser compatibility
+                            String encodedName = java.net.URLEncoder.encode(originalName, "UTF-8").replace("+", "%20");
+                            String headerValue = String.format("attachment; filename=\"%s\"; filename*=UTF-8''%s",
+                                    encodedName, encodedName);
+                            resp.setHeader(headerKey, headerValue);
+
+                            // Stream file
+                            try (java.io.FileInputStream inStream = new java.io.FileInputStream(file);
+                                    java.io.OutputStream outStream = resp.getOutputStream()) {
+
+                                byte[] buffer = new byte[4096];
+                                int bytesRead = -1;
+
+                                while ((bytesRead = inStream.read(buffer)) != -1) {
+                                    outStream.write(buffer, 0, bytesRead);
+                                }
+                            }
+                        } else {
+                            // Fallback for older/mock resources without real files
+                            serveDummyFile(resp, r);
+                        }
+                    } else {
+                        resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Resource not found");
+                    }
+                } else {
+                    resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Resource not found");
+                }
             } catch (NumberFormatException e) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid ID");
+            } catch (Exception e) {
+                e.printStackTrace();
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server Error");
             }
         }
+    }
+
+    private void serveDummyFile(HttpServletResponse resp, Resource r) throws IOException {
+        String safeName = r.getTitle().replaceAll("[^a-zA-Z0-9._\\-\\u4e00-\\u9fa5]", "_"); // Allow Chinese
+        String encodedName = java.net.URLEncoder.encode(safeName, "UTF-8").replace("+", "%20");
+        String filename = encodedName + ".txt";
+
+        resp.setContentType("application/octet-stream");
+        resp.setHeader("Content-Disposition",
+                "attachment; filename=\"" + filename + "\"; filename*=UTF-8''" + filename);
+        String content = "Real file not found on server.\n\nMetadata:\nTitle: " + r.getTitle() +
+                "\nDescription: " + r.getDescription();
+        resp.getWriter().write(content);
     }
 
     private void searchQuestions(HttpServletRequest req, HttpServletResponse resp) throws IOException {

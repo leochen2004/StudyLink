@@ -66,6 +66,7 @@ public class TeacherServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.setCharacterEncoding("UTF-8");
         User user = checkTeacher(req, resp);
         if (user == null)
             return;
@@ -79,6 +80,8 @@ public class TeacherServlet extends HttpServlet {
             deleteQuestion(req, resp);
         } else if ("/answer/delete".equals(pathInfo)) {
             deleteAnswer(req, resp);
+        } else if ("/resource/update_visibility".equals(pathInfo)) {
+            updateResourceVisibility(req, resp, user);
         }
     }
 
@@ -120,6 +123,7 @@ public class TeacherServlet extends HttpServlet {
         }
         json.append("],");
 
+        // ... existing code ...
         json.append("\"answeredQuestions\": [");
         first = true;
         for (Question q : questions) {
@@ -131,11 +135,6 @@ public class TeacherServlet extends HttpServlet {
                 StringBuilder ansJson = new StringBuilder("[");
                 for (int j = 0; j < answers.size(); j++) {
                     Answer a = answers.get(j);
-                    // Only include answers by THIS teacher? Or all? Requirement says "Delete OWN
-                    // answer".
-                    // Ideally we filter by user.getId(), but for now let's send all and frontend
-                    // can filter or valid backend check.
-                    // Let's filter here to be safe and clean.
                     if (a.getTeacherId() == user.getId()) {
                         if (ansJson.length() > 1)
                             ansJson.append(",");
@@ -154,7 +153,26 @@ public class TeacherServlet extends HttpServlet {
                 first = false;
             }
         }
+        json.append("],");
+
+        // Add My Resources
+        List<Resource> myResources = resourceDAO.getResourcesByUploader(user.getId());
+        json.append("\"myResources\": [");
+        for (int i = 0; i < myResources.size(); i++) {
+            Resource r = myResources.get(i);
+            json.append(String.format(
+                    "{\"id\":%d, \"title\":\"%s\", \"courseName\":\"%s\", \"visibility\":\"%s\", \"status\":\"%s\", \"downloadCount\":%d}",
+                    r.getId(),
+                    r.getTitle().replace("\"", "\\\""),
+                    r.getCourseName().replace("\"", "\\\""),
+                    r.getVisibility(),
+                    r.getStatus(),
+                    r.getDownloadCount()));
+            if (i < myResources.size() - 1)
+                json.append(",");
+        }
         json.append("]");
+
         json.append("}");
 
         resp.setContentType("application/json");
@@ -164,6 +182,7 @@ public class TeacherServlet extends HttpServlet {
 
     private void addResource(HttpServletRequest req, HttpServletResponse resp, User user)
             throws IOException, ServletException {
+        req.setCharacterEncoding("UTF-8");
         // Ensure multipart request is parsed
         if (req.getContentType() != null && req.getContentType().toLowerCase().contains("multipart/form-data")) {
             req.getParts();
@@ -188,26 +207,40 @@ public class TeacherServlet extends HttpServlet {
             return;
         }
 
-        String filePath = "uploads/dummy.pdf"; // Default fallback
-        String fileType = "PDF";
+        // Use portable path relative to project root
+        String projectRoot = System.getProperty("user.dir");
+        String uploadPath = projectRoot + java.io.File.separator + "src" + java.io.File.separator + "main"
+                + java.io.File.separator + "webapp" + java.io.File.separator + "uploads";
+        java.io.File uploadDir = new java.io.File(uploadPath);
+        if (!uploadDir.exists())
+            uploadDir.mkdirs();
 
+        String filePath = "";
+        String fileType = "FILE";
+
+        String savedFileName = "";
         try {
             Part filePart = req.getPart("file");
             if (filePart != null && filePart.getSize() > 0) {
                 String fileName = getSubmittedFileName(filePart);
-                // Save logic would go here. For now, use dummy path.
-                filePath = "uploads/" + UUID.randomUUID().toString() + "_" + fileName;
-                // filePart.write("path/to/save/" + fileName);
+                String uuid = UUID.randomUUID().toString();
+                savedFileName = uuid + "_" + fileName;
+                filePath = uploadPath + java.io.File.separator + savedFileName;
+
+                // Write file to disk
+                filePart.write(filePath);
+
                 if (fileName.toLowerCase().endsWith(".png") || fileName.toLowerCase().endsWith(".jpg"))
                     fileType = "IMAGE";
                 else if (fileName.toLowerCase().endsWith(".zip"))
                     fileType = "ZIP";
-                else
+                else if (fileName.toLowerCase().endsWith(".pdf"))
                     fileType = "PDF";
             }
         } catch (Exception e) {
             // Handle Multipart config issues in simulation or missing part
-            System.out.println("File upload simulated or failed: " + e.getMessage());
+            System.out.println("File upload upload logic failed: " + e.getMessage());
+            e.printStackTrace();
         }
 
         Resource r = new Resource();
@@ -215,7 +248,7 @@ public class TeacherServlet extends HttpServlet {
         r.setDescription(desc);
         r.setCourseId(courseId);
         r.setUploaderId(user.getId());
-        r.setFilePath(filePath);
+        r.setFilePath("uploads/" + savedFileName); // Store relative path
         r.setFileType(fileType);
         r.setVisibility(visibility);
 
@@ -273,6 +306,26 @@ public class TeacherServlet extends HttpServlet {
                 // In a real app, verify ownership
                 questionDAO.deleteAnswer(Integer.parseInt(idStr));
             } catch (Exception e) {
+            }
+        }
+        resp.sendRedirect(req.getContextPath() + "/teacher.html");
+    }
+
+    private void updateResourceVisibility(HttpServletRequest req, HttpServletResponse resp, User user)
+            throws IOException {
+        String idStr = req.getParameter("resourceId");
+        String visibility = req.getParameter("visibility"); // PUBLIC or PRIVATE
+
+        if (idStr != null && visibility != null) {
+            try {
+                int resourceId = Integer.parseInt(idStr);
+                // In a real app, verify ownership (check if resource belongs to user)
+                Resource r = resourceDAO.getResourceById(resourceId);
+                if (r != null && r.getUploaderId() == user.getId()) {
+                    resourceDAO.updateVisibility(resourceId, visibility);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
         resp.sendRedirect(req.getContextPath() + "/teacher.html");

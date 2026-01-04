@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - StudyLink</title>
+    <title>注册 - StudyLink</title>
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/styles.css">
     <script src="js/mock-data.js"></script>
@@ -57,33 +57,33 @@
 
 <body>
     <div class="login-card">
-        <div class="brand-title">Create Account</div>
+        <div class="brand-title">创建账户</div>
 
         <form action="auth/register" method="POST" onsubmit="return handleLocalRegister(event)">
             <div class="form-group">
-                <input type="text" name="username" class="md3-text-field" placeholder="Username" required>
+                <input type="text" name="username" class="md3-text-field" placeholder="用户名" required>
             </div>
             <div class="form-group">
-                <input type="password" name="password" class="md3-text-field" placeholder="Password" required>
+                <input type="password" name="password" class="md3-text-field" placeholder="密码" required>
             </div>
             <div class="form-group">
-                <input type="text" name="fullName" class="md3-text-field" placeholder="Full Name" required>
+                <input type="text" name="fullName" class="md3-text-field" placeholder="姓名" required>
             </div>
             <div class="form-group">
-                <input type="email" name="email" class="md3-text-field" placeholder="Email Address" required>
+                <input type="email" name="email" class="md3-text-field" placeholder="电子邮箱" required>
             </div>
             <div class="form-group">
                 <select name="role" class="md3-text-field">
-                    <option value="STUDENT">Student</option>
-                    <option value="TEACHER">Teacher</option>
+                    <option value="STUDENT">学生</option>
+                    <option value="TEACHER">教师</option>
                 </select>
             </div>
             <button type="submit" class="md3-button-filled"
-                style="width: 100%; padding: 14px; font-size: 16px;">Register</button>
+                style="width: 100%; padding: 14px; font-size: 16px;">注册</button>
         </form>
 
         <div class="footer-link">
-            Already have an account? <a href="index.html">Sign In</a>
+            已有账号？ <a href="index.html">立即登录</a>
         </div>
     </div>
 
@@ -102,10 +102,10 @@
 
                 const res = MockAPI.register(user);
                 if (res.success) {
-                    alert('Registration successful! Please login.');
+                    alert('注册成功！请登录。');
                     window.location.href = 'index.html';
                 } else {
-                    alert('Registration failed: ' + res.message);
+                    alert('注册失败: ' + res.message);
                 }
                 return false;
             }

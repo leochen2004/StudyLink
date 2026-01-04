@@ -101,8 +101,8 @@ public class AdminServlet extends HttpServlet {
         json.append("\"teachers\": [");
         for (int i = 0; i < teachers.size(); i++) {
             User t = teachers.get(i);
-            json.append(String.format("{\"id\":%d, \"full_name\":\"%s\", \"title\":\"%s\"}",
-                    t.getId(), t.getFullName(), t.getTitle()));
+            json.append(String.format("{\"id\":%d, \"username\":\"%s\", \"fullName\":\"%s\"}",
+                    t.getId(), t.getUsername(), t.getFullName()));
             if (i < teachers.size() - 1)
                 json.append(",");
         }
@@ -160,7 +160,6 @@ public class AdminServlet extends HttpServlet {
         u.setRole("TEACHER");
         u.setFullName(req.getParameter("fullName"));
         u.setEmail(req.getParameter("email"));
-        u.setTitle(req.getParameter("title"));
         u.setBio(req.getParameter("bio"));
         userDAO.register(u);
         resp.sendRedirect(req.getContextPath() + "/admin.html");

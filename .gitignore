@@ -42,3 +42,7 @@ buildNumber.properties
 .project
 .settings/
 bin/
+
+# Environment Variables
+.env
+.env.local

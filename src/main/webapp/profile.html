@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Profile - StudyLink</title>
+    <title>我的个人资料 - StudyLink</title>
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/styles.css">
     <script src="js/mock-data.js"></script>
@@ -30,26 +30,26 @@
 <body>
     <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
-            <h2 style="margin:0;">Edit Profile</h2>
-            <button class="md3-button-outlined" onclick="history.back()">Back</button>
+            <h2 style="margin:0;">编辑个人资料</h2>
+            <button class="md3-button-outlined" onclick="history.back()">返回</button>
         </div>
 
         <form action="profile/update" method="POST" onsubmit="return handleUpdate(event)">
             <div style="margin-bottom:20px;">
-                <label>Full Name</label>
+                <label>姓名</label>
                 <input type="text" id="fullName" name="fullName" class="md3-text-field" required>
             </div>
             <div style="margin-bottom:20px;">
-                <label>Role (Read Only)</label>
+                <label>角色（只读）</label>
                 <input type="text" id="role" class="md3-text-field" disabled style="background:#eee;">
             </div>
             <div style="margin-bottom:20px;">
-                <label>New Password</label>
+                <label>新密码</label>
                 <input type="password" id="password" name="password" class="md3-text-field"
-                    placeholder="Leave blank to keep current">
+                    placeholder="留空保持不变">
             </div>
 
-            <button type="submit" class="md3-button-filled" style="width:100%;">Save Changes</button>
+            <button type="submit" class="md3-button-filled" style="width:100%;">保存更改</button>
         </form>
     </div>
 
@@ -71,7 +71,7 @@
                 if (pass) user.password = pass;
 
                 MockAPI.updateUser(user);
-                alert('Profile Updated Successfully!');
+                alert('个人资料更新成功！');
                 return false;
             }
             return true;

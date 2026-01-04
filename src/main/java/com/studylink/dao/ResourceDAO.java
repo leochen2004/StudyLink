@@ -89,6 +89,38 @@ public class ResourceDAO {
         return false;
     }
 
+    public List<Resource> getStudentVisibleResources(int studentId) {
+        List<Resource> resources = new ArrayList<>();
+        String sql = "SELECT r.*, u.full_name as uploader_name, c.name as course_name " +
+                "FROM resources r " +
+                "JOIN users u ON r.uploader_id = u.id " +
+                "JOIN courses c ON r.course_id = c.id " +
+                "WHERE r.status = 'APPROVED' AND (" +
+                "  r.visibility = 'PUBLIC' " +
+                "  OR " +
+                "  (r.visibility = 'PRIVATE' AND r.course_id IN (SELECT course_id FROM course_students WHERE student_id = ?))"
+                +
+                ") " +
+                "ORDER BY r.created_at DESC";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            conn = DBUtil.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, studentId);
+            rs = pstmt.executeQuery();
+            while (rs.next()) {
+                resources.add(mapRowToResource(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.close(rs, pstmt, conn);
+        }
+        return resources;
+    }
+
     public List<Resource> getResourcesByUploader(int uploaderId) {
         List<Resource> resources = new ArrayList<>();
         String sql = "SELECT r.*, u.full_name as uploader_name, c.name as course_name " +
@@ -195,6 +227,25 @@ public class ResourceDAO {
             conn = DBUtil.getConnection();
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, status);
+            pstmt.setInt(2, id);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.close(pstmt, conn);
+        }
+        return false;
+    }
+
+    public boolean updateVisibility(int id, String visibility) {
+        String sql = "UPDATE resources SET visibility = ? WHERE id = ?";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+
+        try {
+            conn = DBUtil.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, visibility);
             pstmt.setInt(2, id);
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {

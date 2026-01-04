@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - StudyLink</title>
+    <title>管理员仪表盘 - StudyLink</title>
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/styles.css">
     <style>
@@ -32,6 +32,7 @@
             font-weight: 800;
             background: linear-gradient(135deg, var(--md-sys-color-primary), #bc00dd);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 48px;
             letter-spacing: -0.5px;
@@ -143,44 +144,44 @@
 <body>
     <div class="sidebar">
         <div class="logo">StudyLink <span
-                style="font-size:12px; font-weight:normal; vertical-align:middle; background:#333; color:white; padding:2px 6px; border-radius:4px;">ADMIN</span>
+                style="font-size:12px; font-weight:normal; vertical-align:middle; background:#333; color:white; padding:2px 6px; border-radius:4px;">管理员</span>
         </div>
-        <div class="nav-item active" onclick="showSection('courses', this)">Course Management</div>
-        <div class="nav-item" onclick="showSection('teachers', this)">Teacher Management</div>
-        <div class="nav-item" onclick="showSection('resources', this)">Resource Moderation</div>
-        <div class="nav-item" onclick="showSection('questions', this)">Q&A Moderation</div>
+        <div class="nav-item active" onclick="showSection('courses', this)">课程管理</div>
+        <div class="nav-item" onclick="showSection('teachers', this)">教师管理</div>
+        <div class="nav-item" onclick="showSection('resources', this)">资源审核</div>
+        <div class="nav-item" onclick="showSection('questions', this)">问答审核</div>
 
         <div class="user-profile">
             <div class="user-avatar">A</div>
-            <div style="font-size:14px; font-weight:600;">Administrator</div>
-            <div style="font-size:14px; color:var(--md-sys-color-error); cursor:pointer; font-weight:600; margin-left:auto;"
-                onclick="handleLogout()">Logout</div>
+            <div style="font-size:14px; font-weight:600;">管理员</div>
+            <div style="font-size:14px; color:var(--md-sys-color-error); cursor:pointer; font-weight:600; margin-left:auto; white-space:nowrap;"
+                onclick="handleLogout()">退出登录</div>
         </div>
     </div>
 
     <div class="main-content">
         <!-- Courses -->
         <div id="courses" class="view-section active">
-            <div class="page-title">Course Management</div>
+            <div class="page-title">课程管理</div>
             <div class="md3-card">
-                <h3 style="margin-top:0;">Add New Course</h3>
+                <h3 style="margin-top:0;">添加新课程</h3>
                 <form action="admin/course/add" method="POST" style="display:flex; gap:16px;">
-                    <input type="text" name="name" class="md3-text-field" placeholder="Course Name"
+                    <input type="text" name="name" class="md3-text-field" placeholder="课程名称"
                         style="margin-bottom:0; flex:1;" required>
                     <select name="teacherId" id="courseTeacherSelect" class="md3-text-field"
                         style="margin-bottom:0; flex:1;" required>
-                        <option selected disabled>Select Teacher</option>
+                        <option selected disabled>选择教师</option>
                     </select>
-                    <button type="submit" class="md3-button-filled">Add Course</button>
+                    <button type="submit" class="md3-button-filled">添加课程</button>
                 </form>
             </div>
             <table class="data-table">
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Course Name</th>
-                        <th>Teacher</th>
-                        <th>Action</th>
+                        <th>课程名称</th>
+                        <th>教师</th>
+                        <th>操作</th>
                     </tr>
                 </thead>
                 <tbody id="courseTable"></tbody>
@@ -189,32 +190,31 @@
 
         <!-- Teachers -->
         <div id="teachers" class="view-section">
-            <div class="page-title">Teacher Management</div>
+            <div class="page-title">教师管理</div>
             <div class="md3-card">
-                <h3 style="margin-top:0;">Add New Teacher</h3>
+                <h3 style="margin-top:0;">添加新教师</h3>
                 <form action="admin/teacher/add" method="POST"
                     style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
-                    <input type="text" name="username" class="md3-text-field" placeholder="Username"
+                    <input type="text" name="username" class="md3-text-field" placeholder="用户名"
                         style="margin-bottom:0;" required>
-                    <input type="password" name="password" class="md3-text-field" placeholder="Password"
+                    <input type="password" name="password" class="md3-text-field" placeholder="密码"
                         style="margin-bottom:0;" required>
-                    <input type="text" name="fullName" class="md3-text-field" placeholder="Full Name"
+                    <input type="text" name="fullName" class="md3-text-field" placeholder="姓名"
                         style="margin-bottom:0;" required>
-                    <input type="email" name="email" class="md3-text-field" placeholder="Email" style="margin-bottom:0;"
+                    <input type="email" name="email" class="md3-text-field" placeholder="电子邮箱" style="margin-bottom:0;"
                         required>
-                    <input type="text" name="title" class="md3-text-field" placeholder="Title (e.g. Professor)"
-                        style="margin-bottom:0;">
-                    <textarea name="bio" class="md3-text-field" placeholder="Bio / Introduction"
-                        style="margin-bottom:0; height:48px;"></textarea>
-                    <button type="submit" class="md3-button-filled" style="grid-column: 1 / -1;">Create Teacher</button>
+
+                    <textarea name="bio" class="md3-text-field" placeholder="简介"
+                        style="margin-bottom:0; height:48px; grid-column: 1 / -1;"></textarea>
+                    <button type="submit" class="md3-button-filled" style="grid-column: 1 / -1;">创建教师</button>
                 </form>
             </div>
             <table class="data-table">
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Username</th>
-                        <th>Full Name</th>
+                        <th>用户名</th>
+                        <th>姓名</th>
                     </tr>
                 </thead>
                 <tbody id="teacherTable"></tbody>
@@ -223,15 +223,15 @@
 
         <!-- Resources -->
         <div id="resources" class="view-section">
-            <div class="page-title">Resource Moderation</div>
+            <div class="page-title">资源审核</div>
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Title</th>
-                        <th>Uploader</th>
-                        <th>Type</th>
-                        <th>Status</th>
-                        <th>Action</th>
+                        <th>标题</th>
+                        <th>上传者</th>
+                        <th>类型</th>
+                        <th>状态</th>
+                        <th>操作</th>
                     </tr>
                 </thead>
                 <tbody id="resourceTable"></tbody>
@@ -240,14 +240,14 @@
 
         <!-- Questions -->
         <div id="questions" class="view-section">
-            <div class="page-title">Q&A Moderation</div>
+            <div class="page-title">问答审核</div>
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Title</th>
-                        <th>Student</th>
-                        <th>Course</th>
-                        <th>Action</th>
+                        <th>标题</th>
+                        <th>学生</th>
+                        <th>课程</th>
+                        <th>操作</th>
                     </tr>
                 </thead>
                 <tbody id="questionsTable"></tbody>
@@ -278,14 +278,14 @@
             const cTable = document.getElementById('courseTable');
             cTable.innerHTML = '';
             data.courses.forEach(c => {
-                cTable.innerHTML += `<tr><td>${c.id}</td><td>${c.name}</td><td>${c.teacherName || '-'}</td><td><button class="md3-button-outlined" style="padding:4px 12px; color:red; border-color:red;" onclick="deleteItem('course', ${c.id})">Delete</button></td></tr>`;
+                cTable.innerHTML += `<tr><td>${c.id}</td><td>${c.name}</td><td>${c.teacherName || '-'}</td><td><button class="md3-button-outlined" style="padding:4px 12px; color:red; border-color:red;" onclick="deleteItem('course', ${c.id})">删除</button></td></tr>`;
             });
 
             // Teachers
             const tTable = document.getElementById('teacherTable');
             const tSelect = document.getElementById('courseTeacherSelect');
             tTable.innerHTML = '';
-            tSelect.innerHTML = '<option selected disabled>Select Teacher</option>';
+            tSelect.innerHTML = '<option selected disabled>选择教师</option>';
             data.teachers.forEach(t => {
                 tTable.innerHTML += `<tr><td>${t.id}</td><td>${t.username}</td><td>${t.fullName}</td></tr>`;
                 tSelect.innerHTML += `<option value="${t.id}">${t.fullName} (${t.username})</option>`;
@@ -296,7 +296,7 @@
             if (data.resources && rTable) {
                 rTable.innerHTML = '';
                 data.resources.forEach(r => {
-                    rTable.innerHTML += `<tr><td>${r.title}</td><td>${r.uploaderName}</td><td>${r.fileType}</td><td>${r.status}</td><td><button class="md3-button-outlined" style="padding:4px 12px; color:red; border-color:red;" onclick="deleteItem('resource', ${r.id})">Delete</button></td></tr>`;
+                    rTable.innerHTML += `<tr><td>${r.title}</td><td>${r.uploaderName}</td><td>${r.fileType}</td><td>${r.status}</td><td><button class="md3-button-outlined" style="padding:4px 12px; color:red; border-color:red;" onclick="deleteItem('resource', ${r.id})">删除</button></td></tr>`;
                 });
             }
 
@@ -305,7 +305,7 @@
             if (data.questions && qTable) {
                 qTable.innerHTML = '';
                 data.questions.forEach(q => {
-                    qTable.innerHTML += `<tr><td>${q.title}</td><td>${q.studentName}</td><td>${q.courseName}</td><td><button class="md3-button-outlined" style="padding:4px 12px; color:red; border-color:red;" onclick="deleteItem('question', ${q.id})">Delete</button></td></tr>`;
+                    qTable.innerHTML += `<tr><td>${q.title}</td><td>${q.studentName}</td><td>${q.courseName}</td><td><button class="md3-button-outlined" style="padding:4px 12px; color:red; border-color:red;" onclick="deleteItem('question', ${q.id})">删除</button></td></tr>`;
                 });
             }
         }
@@ -320,7 +320,7 @@
         }
 
         function deleteItem(type, id) {
-            if (!confirm('Are you sure?')) return;
+            if (!confirm('确定吗？')) return;
             if (window.location.protocol === 'file:') {
                 document.querySelector('tr').remove(); // Visual mock
                 return;

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher Dashboard - StudyLink</title>
+    <title>教师仪表盘 - StudyLink</title>
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/styles.css">
     <style>
@@ -32,6 +32,7 @@
             font-weight: 800;
             background: linear-gradient(135deg, var(--md-sys-color-primary), #bc00dd);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 48px;
             letter-spacing: -0.5px;
@@ -67,6 +68,8 @@
             flex-grow: 1;
             padding: 40px 48px;
             overflow-y: auto;
+            height: 100vh;
+            box-sizing: border-box;
         }
 
         .page-title {
@@ -150,64 +153,87 @@
 <body>
     <div class="sidebar">
         <div class="logo">StudyLink <span
-                style="font-size:12px; font-weight:normal; vertical-align:middle; background:#6750a4; color:white; padding:2px 6px; border-radius:4px;">TEACHER</span>
+                style="font-size:12px; font-weight:normal; vertical-align:middle; background:#6750a4; color:white; padding:2px 6px; border-radius:4px;">教师版</span>
         </div>
-        <div class="nav-item active" onclick="showSection('overview', this)">Overview</div>
-        <div class="nav-item" onclick="showSection('publish', this)">Publish Resource</div>
+        <div class="nav-item active" onclick="showSection('overview', this)">概览</div>
+        <div class="nav-item" onclick="showSection('publish', this)">发布资源</div>
+        <div class="nav-item" onclick="showSection('my-resources', this)">
+            <span>我的资源</span>
+        </div>
         <div class="nav-item" onclick="showSection('qa', this)">
-            <span>Q&A Management</span>
+            <span>问答管理</span>
             <span id="qaBadge" class="notification-badge">0</span>
         </div>
 
         <div class="user-profile">
             <div class="user-avatar">T</div>
-            <div style="font-size:14px; font-weight:600;">Instructor</div>
-            <div style="font-size:14px; color:var(--md-sys-color-error); cursor:pointer; font-weight:600; margin-left:auto;"
-                onclick="handleLogout()">Logout</div>
+            <div style="font-size:14px; font-weight:600;">讲师</div>
+            <div style="font-size:14px; color:var(--md-sys-color-error); cursor:pointer; font-weight:600; margin-left:auto; white-space:nowrap;"
+                onclick="handleLogout()">退出登录</div>
         </div>
     </div>
 
     <div class="main-content">
         <!-- Overview -->
         <div id="overview" class="view-section active">
-            <div class="page-title">Teacher Overview</div>
+            <div class="page-title">教师概览</div>
             <div class="md3-card">
-                <h3>My Courses</h3>
+                <h3>我的课程</h3>
                 <ul id="courseList" style="list-style:none; padding:0;"></ul>
             </div>
         </div>
 
         <!-- Publish -->
         <div id="publish" class="view-section">
-            <div class="page-title">Publish Resource</div>
+            <div class="page-title">发布资源</div>
             <div class="md3-card">
                 <form action="teacher/resource/add" method="POST" enctype="multipart/form-data">
-                    <input type="text" name="title" class="md3-text-field" placeholder="Resource Title" required>
-                    <textarea name="description" class="md3-text-field" placeholder="Description"
+                    <input type="text" name="title" class="md3-text-field" placeholder="资源标题" required>
+                    <textarea name="description" class="md3-text-field" placeholder="描述"
                         style="height:100px;"></textarea>
                     <div style="display:flex; gap:16px;">
                         <select name="courseId" id="publishCourseSelect" class="md3-text-field" required>
-                            <option value="" disabled selected>Select Course</option>
+                            <option value="" disabled selected>选择课程</option>
                         </select>
                         <select name="visibility" class="md3-text-field">
-                            <option value="PUBLIC">Public (All Students)</option>
-                            <option value="PRIVATE">Private (Class Only)</option>
+                            <option value="PUBLIC">公开（所有学生）</option>
+                            <option value="PRIVATE">私有（仅班级）</option>
                         </select>
                     </div>
                     <input type="file" name="file" class="md3-text-field" style="padding:10px;" required>
-                    <button type="submit" class="md3-button-filled">Publish</button>
+                    <button type="submit" class="md3-button-filled">发布</button>
                 </form>
+            </div>
+        </div>
+
+        <!-- My Resources -->
+        <div id="my-resources" class="view-section">
+            <div class="page-title">我的资源</div>
+            <div class="md3-card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>标题</th>
+                            <th>课程</th>
+                            <th>可见性</th>
+                            <th>状态</th>
+                            <th>下载量</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myResourcesList">
+                    </tbody>
+                </table>
             </div>
         </div>
 
         <!-- Q&A -->
         <div id="qa" class="view-section">
-            <div class="page-title">Q&A Management</div>
+            <div class="page-title">问答管理</div>
             <div style="margin-bottom:20px; border-bottom:1px solid #ddd;">
                 <button class="md3-button-outlined" onclick="toggleQaTab('unanswered')" id="tab-unanswered"
-                    style="border-radius:0; border:none; border-bottom:2px solid var(--md-sys-color-primary);">Pending</button>
+                    style="border-radius:0; border:none; border-bottom:2px solid var(--md-sys-color-primary);">待处理</button>
                 <button class="md3-button-outlined" onclick="toggleQaTab('history')" id="tab-history"
-                    style="border-radius:0; border:none; color:grey;">History</button>
+                    style="border-radius:0; border:none; color:grey;">历史记录</button>
             </div>
 
             <div id="unansweredList" style="display:flex; flex-direction:column; gap:16px;"></div>
@@ -219,15 +245,15 @@
     <div id="answerModal"
         style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; z-index:100;">
         <div class="md3-card" style="width:500px; background:white;">
-            <h3>Answer Question</h3>
+            <h3>回答问题</h3>
             <form action="teacher/question/answer" method="POST">
                 <input type="hidden" name="questionId" id="modalQId">
                 <p id="modalQTitle" style="font-weight:bold;"></p>
-                <textarea name="content" class="md3-text-field" style="height:150px;" placeholder="Write your answer..."
+                <textarea name="content" class="md3-text-field" style="height:150px;" placeholder="在此输入您的回答..."
                     required></textarea>
                 <div style="text-align:right;">
-                    <button type="button" class="md3-button-outlined" onclick="closeModal()">Cancel</button>
-                    <button type="submit" class="md3-button-filled">Submit Answer</button>
+                    <button type="button" class="md3-button-outlined" onclick="closeModal()">取消</button>
+                    <button type="submit" class="md3-button-filled">提交回答</button>
                 </div>
             </form>
         </div>
@@ -255,12 +281,48 @@
             // Courses
             const cl = document.getElementById('courseList');
             const ps = document.getElementById('publishCourseSelect');
+            
+            // Save current selection
+            const currentPsVal = ps.value;
+
             cl.innerHTML = '';
-            ps.innerHTML = '<option disabled selected>Select Course</option>';
+            ps.innerHTML = '<option disabled selected>选择课程</option>';
             data.courses.forEach(c => {
                 cl.innerHTML += `<li style="padding:12px; border-bottom:1px solid #eee;"><b>${c.name}</b></li>`;
                 ps.innerHTML += `<option value="${c.id}">${c.name}</option>`;
             });
+
+            // Restore selection
+            if (currentPsVal) ps.value = currentPsVal;
+
+            // Restore selection
+            if (currentPsVal) ps.value = currentPsVal;
+
+            // My Resources
+            const myRl = document.getElementById('myResourcesList');
+            if (myRl && data.myResources) {
+                if (data.myResources.length > 0) {
+                    myRl.innerHTML = data.myResources.map(r => `
+                        <tr>
+                            <td>${r.title}</td>
+                            <td>${r.courseName}</td>
+                            <td>
+                                <select onchange="handleVisibilityChange(${r.id}, this.value)" 
+                                    style="padding: 4px; border-radius: 4px; border: 1px solid #ddd; 
+                                           background: ${r.visibility === 'PUBLIC' ? '#e8f5e9' : '#fff3e0'};
+                                           color: ${r.visibility === 'PUBLIC' ? '#2e7d32' : '#ef6c00'}; font-weight: bold;">
+                                    <option value="PUBLIC" ${r.visibility === 'PUBLIC' ? 'selected' : ''}>公开</option>
+                                    <option value="PRIVATE" ${r.visibility === 'PRIVATE' ? 'selected' : ''}>私有</option>
+                                </select>
+                            </td>
+                            <td>${r.status === 'APPROVED' ? '已批准' : '待审核'}</td>
+                            <td>${r.downloadCount}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    myRl.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:24px; color:#666;">暂无上传资源</td></tr>';
+                }
+            }
 
             // Questions
             const ql = document.getElementById('unansweredList');
@@ -275,9 +337,9 @@
                 ql.innerHTML += `
                <div class="md3-card">
                    <div style="font-weight:bold; font-size:18px;">${q.title}</div>
-                   <div style="color:grey; font-size:13px; margin-bottom:12px;">Student: ${q.studentName} | Course: ${q.courseName}</div>
+                   <div style="color:grey; font-size:13px; margin-bottom:12px;">学生: ${q.studentName} | 课程: ${q.courseName}</div>
                    <p>${q.content}</p>
-                   <button class="md3-button-filled" onclick="openModal(${q.id}, '${q.title.replace(/'/g, "\\'")}')">Answer</button>
+                   <button class="md3-button-filled" onclick="openModal(${q.id}, '${q.title.replace(/'/g, "\\'")}')">回答</button>
                </div>`;
             });
 
@@ -294,17 +356,42 @@
                         hl.innerHTML += `
                         <div class="md3-card" style="border-left:4px solid #4caf50;">
                             <div style="font-weight:bold;">${q.title}</div>
-                            <div style="font-size:12px; color:grey;">Student: ${q.studentName}</div>
+                            <div style="font-size:12px; color:grey;">学生: ${q.studentName}</div>
                             <div style="background:#f9f9f9; padding:8px; margin-top:8px; border-radius:8px;">
-                                <b>Your Answer:</b> ${ansText}
+                                <b>您的回答:</b> ${ansText}
                             </div>
                             <div style="margin-top:8px; text-align:right;">
-                                <button class="md3-button-outlined" style="color:red; border-color:red; font-size:12px;" onclick="handleDeleteAnswer(${ansId})">Delete Answer</button>
+                                <button class="md3-button-outlined" style="color:red; border-color:red; font-size:12px;" onclick="handleDeleteAnswer(${ansId})">删除回答</button>
                             </div>
                         </div>`;
                     });
                 }
             }
+        }
+
+        function handleVisibilityChange(resourceId, newVisibility) {
+            if (window.location.protocol === 'file:') {
+               // Mock Update
+               alert("Local simulation: Visibility changed to " + newVisibility);
+               return;
+            }
+            
+            // Send POST request
+            const formData = new URLSearchParams();
+            formData.append('resourceId', resourceId);
+            formData.append('visibility', newVisibility);
+
+            fetch('teacher/resource/update_visibility', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: formData
+            })
+            .then(() => {
+                loadData(); // Reload to confirm
+            })
+            .catch(err => console.error(err));
         }
 
         function mockData() {
@@ -324,7 +411,7 @@
         }
 
         function handleDeleteAnswer(ansId) {
-            if (!confirm("Recall this answer?")) return;
+            if (!confirm("确定撤回此回答吗？")) return;
             if (window.location.protocol === 'file:') {
                 alert("Cannot delete in local mock mode without finding the question ID logic override.");
                 return;

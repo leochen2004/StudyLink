@@ -25,12 +25,42 @@ public class DBUtil {
                 throw new RuntimeException("db.driver not specified in db.properties");
             }
             Class.forName(driver);
+
+            // Try loading from .env.local
+            loadEnvLocal();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
             throw new RuntimeException("Error loading MySQL Driver", e);
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("Error loading database properties", e);
+        }
+    }
+
+    private static void loadEnvLocal() {
+        java.io.File envFile = new java.io.File(".env.local");
+        if (envFile.exists()) {
+            System.out.println("Loading configuration from .env.local...");
+            try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(envFile))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.trim().isEmpty() || line.startsWith("#"))
+                        continue;
+                    String[] parts = line.split("=", 2);
+                    if (parts.length == 2) {
+                        String key = parts[0].trim();
+                        String value = parts[1].trim();
+                        if ("DB_URL".equals(key))
+                            properties.setProperty("db.url", value);
+                        else if ("DB_USERNAME".equals(key))
+                            properties.setProperty("db.username", value);
+                        else if ("DB_PASSWORD".equals(key))
+                            properties.setProperty("db.password", value);
+                    }
+                }
+            } catch (IOException e) {
+                System.err.println("Warning: Failed to read .env.local: " + e.getMessage());
+            }
         }
     }
 
