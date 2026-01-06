@@ -1,16 +1,13 @@
-# StudyLink 项目启动指南
+# StudyLink - 大学生线上学习资源共享与问答系统
 
-**测试日期:** 2026-01-04  
-**环境:** Localhost (Tomcat 7.0.47)  
-**测试人员:** Antigravity Agent
+这是一个基于 Java Web (Servlet + JDBC) 开发的学习资源共享与答疑互动平台。该项目旨在提高大学生的在线学习效率，支持文件共享、在线问答、课程管理等功能。
 
 ---
 
-## 系统功能模块
 
-StudyLink 平台包含三个主要角色：学生、教师和管理员，各端功能如下：
+## 1. 技术选型
 
-### 学生端
+本项目坚持 **"轻量级、原生化"** 的原则，采用经典的 Java EE 技术栈，未使用重型框架 (Spring/MyBatis)，以确保运行高效且易于理解底层原理。
 
 1.  **学生选课 (Student Enrollment)**
     - _功能描述_: 浏览可选课程并进行订阅。
@@ -49,8 +46,13 @@ StudyLink 平台包含三个主要角色：学生、教师和管理员，各端�
     - _功能描述_: 修改头像和资料。
     - _核心实现_: `ProfileServlet` 处理更新请求。
     - _技术细节_: 更新成功后，需同步更新 `HttpSession` 中的 `user` 对象，确保页面刷新后立即显示新资料而无需重新登录。
+*   **后端核心**: Java Servlet, JDBC (原生数据库连接)
+*   **前端核心**: HTML5, CCS3 (Variables), JavaScript (ES6+), AJAX (Fetch API)
+*   **数据库**: MySQL 8.0
+*   **构建工具**: Apache Maven
+*   **服务器**: Apache Tomcat 7/8/9
 
-### 教师端
+---
 
 1.  **授课管理 (Course Management)**
     - _功能描述_: 查看负责课程。
@@ -70,8 +72,13 @@ StudyLink 平台包含三个主要角色：学生、教师和管理员，各端�
       - **待处理**: `QuestionDAO` 查询所有 `teacher_id` 匹配且 `answer_count = 0` 的问题。
       - **历史记录/撤回**: `TeacherServlet` 处理 `/answer/delete`。
       - **技术细节**: 删除回答时 (`deleteAnswer`)，通常只删除 `answers` 表记录。若需更完善，应同时处理或标记对应的通知为失效（当前简化实现仅删除回答）。
+## 2. 基本设计思路
 
-### 管理员端
+### 系统架构 (MVC)
+系统严格遵循 **MVC (Model-View-Controller)** 设计模式，实现界面与逻辑的分离：
+*   **Model (模型层)**: `com.studylink.model` 包中的 Java Bean (User, Course, etc.) 及 `com.studylink.dao` 包中的数据访问对象，负责数据的封装与持久化。
+*   **View (视图层)**: `webapp` 目录下的 HTML 文件。不使用 JSP，而是通过 **AJAX** 异步请求后端 JSON 接口，在前端进行数据渲染，实现"前后端分离"的开发体验。
+*   **Controller (控制层)**: `com.studylink.controller` 包中的 Servlet。负责接收 HTTP 请求，解析参数，调用 DAO 层业务，并返回 JSON 数据或页面跳转。
 
 1.  **课程管理 (Course Management)**
     - _功能描述_: 维护课程数据。
@@ -89,49 +96,75 @@ StudyLink 平台包含三个主要角色：学生、教师和管理员，各端�
     - _功能描述_: 净化社区环境。
     - _核心实现_: 查看全站问题列表。
     - _技术细节_: 调用 `QuestionDAO.deleteQuestion`。此操作通过级联删除（DB 外键）自动移除该问题下的所有回答 (`answers`) 和相关通知。
-
-## 项目启动指南
-
-### 1. 环境准备
-
-在启动项目之前，请确保你的本地开发环境满足以下要求：
-
-- **JDK**: 1.8 (必需)
-- **Maven**: 3.x (用于构建和依赖管理)
-- **MySQL**: 8.0+ (建议 8.0.33)
-
-### 2. 数据库配置
-
-本项目使用 MySQL 数据库。
-
-1.  **初始化数据库**:
-    使用项目根目录下的 `schema.sql` 脚本创建数据库和表结构。
-
-    ```bash
-    mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS study_link_db;"
-    mysql -u root -p study_link_db < study_link_db.sql
-    ```
-
-2.  **配置连接信息 (.env.local)**:
-    为了安全和便利，建议在项目根目录下创建一个名为 `.env.local` 的文件（该文件已被 git 忽略），并填入你的本地数据库配置：
-    ```properties
-    # .env.local 示例
-    DB_URL=jdbc:mysql://localhost:3306/study_link_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    DB_USERNAME=你的用户名 (例如 root)
-    DB_PASSWORD=你的密码
-    ```
-    _如果不创建此文件，系统将默认尝试使用 `root` / `123456` 连接。_
-
-### 3. 启动项目
-
-本项目集成了 Tomcat 7 Maven 插件，支持一键启动。
-
-在项目根目录下运行：
-
-```bash
-mvn tomcat7:run
-```
-
-启动成功后，访问地址：[http://localhost:8081/studylink](http://localhost:8081/studylink)
+### 数据库设计
+核心表结构设计如下：
+*   `users`: 存储 Admin/Teacher/Student 用户信息，通过 `role` 字段区分权限。
+*   `courses`: 课程信息表。
+*   `resources`: 资源表，记录文件路径及上传者/课程的关联。
+*   `questions` & `answers`: 问答系统表，支持多对多关联。
+*   `notifications`: 异步通知消息表。
 
 ---
+
+## 3. 开发进度安排
+
+| 阶段 | 时间节点 | 完成内容 | 状态 |
+| :--- | :--- | :--- | :--- |
+| **第一周** | Day 1-3 | 需求分析，确定功能模块，完成数据库 Schema 设计 (`study_link_db.sql`)。 | ✅ 完成 |
+| | Day 4-7 | 搭建 Maven 项目骨架，实现基础的 UserDAO 及登录/注册功能 (`AuthServlet`)。 | ✅ 完成 |
+| **第二周** | Day 1-4 | 完成学生端核心功能：选课、资源浏览、提问 (`StudentServlet`)。 | ✅ 完成 |
+| | Day 5-7 | 完成教师端功能：回答问题、发布资源、权限管理 (`TeacherServlet`)。 | ✅ 完成 |
+| **第三周** | Day 1-3 | 完成管理员模块及前端 UI 美化 (Material Design 风格)。 | ✅ 完成 |
+| | Day 4-5 | 系统集成测试，修复通知不同步及文件下载路径问题。 | ✅ 完成 |
+| **验收周** | Day 6-7 | 撰写技术文档及实验报告，准备答辩演示。 | ✅ 完成 |
+
+---
+
+## 4. 功能模块详解
+
+### 4.1 学生功能
+*   **通知提醒**: 实时查看教师回复通知。
+*   **资源浏览**: 按课程/关键字检索资源，支持 PDF/图片/ZIP下载。
+*   **资源上传**: 分享个人学习资料。
+*   **互动问答**: 提出问题（支持图片附件），查看历史问答。
+*   **个人中心**: 管理个人资料及已发布内容。
+
+### 4.2 教师功能
+*   **答疑管理**: 系统自动统计"未回答问题"，教师可进行图文回复。
+*   **资源发布**: 上传课件，并可设置"仅本班可见"或"公开"。
+*   **课程中心**: 查看所授课程及学生选课情况。
+
+### 4.3 管理员功能
+*   **全站维护**: 管理所有课程、教师账号、资源及问答内容，确保内容合规。
+
+---
+
+## 5. 如何运行
+
+### 环境要求
+*   JDK 1.8+
+*   Maven 3.x
+*   MySQL 8.0+
+
+### 启动步骤
+
+1.  **数据库初始化**:
+    在 MySQL 中执行根目录下的 `study_link_db.sql` 脚本：
+    ```bash
+    mysql -u root -p < study_link_db.sql
+    ```
+    *(默认数据库账号: root / 密码: 123456。如需修改，请编辑 `src/main/resources/db.properties`)*
+
+2.  **启动服务器**:
+    在项目根目录运行 Maven 命令：
+    ```bash
+    mvn tomcat7:run
+    ```
+
+3.  **访问系统**:
+    打开浏览器访问: [http://localhost:8081/studylink](http://localhost:8081/studylink)
+
+### 测试账号
+*   **管理员**: `admin` / `admin123`
+*   **教师**: `teacher1` / `123456`
+*   **学生**: `student1` / `123456`

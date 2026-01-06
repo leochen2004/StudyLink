@@ -13,6 +13,9 @@
 
  Date: 04/01/2026 14:08:21
 */
+-- 在文件最开头添加这几行
+CREATE DATABASE IF NOT EXISTS studylink;
+USE studylink;
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
