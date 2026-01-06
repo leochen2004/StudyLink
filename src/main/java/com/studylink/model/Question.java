@@ -11,15 +11,15 @@ public class Question {
     private String imagePath;
     private Timestamp createdAt;
 
-    // Display
+    // 显示
     private String studentName;
     private String courseName;
-    private int answerCount; // Derived
+    private int answerCount; // 派生
 
     public Question() {
     }
 
-    // Getters Setters
+    // Getter 和 Setter
     public int getId() {
         return id;
     }

@@ -84,7 +84,7 @@ public class NotificationDAO {
         return 0;
     }
 
-    // Optional: Mark as read
+    // 可选：标记为已读
     public void markAllAsRead(int userId) {
         String sql = "UPDATE notifications SET is_read = TRUE WHERE user_id = ?";
         Connection conn = null;

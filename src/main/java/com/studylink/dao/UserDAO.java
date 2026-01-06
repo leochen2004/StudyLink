@@ -64,7 +64,7 @@ public class UserDAO {
                 user.setFullName(rs.getString("full_name"));
                 user.setEmail(rs.getString("email"));
                 user.setTitle(rs.getString("title"));
-                // Add other fields as necessary
+                // 根据需要添加其他字段
                 return user;
             }
         } catch (SQLException e) {

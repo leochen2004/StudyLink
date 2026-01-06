@@ -120,7 +120,7 @@ public class QuestionDAO {
         PreparedStatement pstmtNotif = null;
         try {
             conn = DBUtil.getConnection();
-            conn.setAutoCommit(false); // Transaction
+            conn.setAutoCommit(false); // 事务
 
             pstmt = conn.prepareStatement(sql);
             pstmt.setInt(1, a.getQuestionId());
@@ -130,9 +130,9 @@ public class QuestionDAO {
             int rows = pstmt.executeUpdate();
 
             if (rows > 0) {
-                // Add notification
+                // 添加通知
                 pstmtNotif = conn.prepareStatement(notifSql);
-                pstmtNotif.setString(1, "student/question?id=" + a.getQuestionId()); // Dummy link
+                pstmtNotif.setString(1, "student/question?id=" + a.getQuestionId()); // 模拟链接
                 pstmtNotif.setInt(2, a.getQuestionId());
                 pstmtNotif.executeUpdate();
 
@@ -151,8 +151,8 @@ public class QuestionDAO {
                 }
             }
         } finally {
-            DBUtil.close(pstmt, null); // Close pstmt manually
-            DBUtil.close(null, pstmtNotif, conn); // Close rest
+            DBUtil.close(pstmt, null); // 手动关闭 pstmt
+            DBUtil.close(null, pstmtNotif, conn); // 关闭其余部分
         }
         return false;
     }
@@ -230,9 +230,9 @@ public class QuestionDAO {
         return false;
     }
 
-    // Deleting an answer is separate if we list answers.
-    // For admin, if they list questions, they might see details.
-    // I'll add deleteAnswer for completeness if needed.
+    // 如果我们列出回答，删除回答是分开的。
+    // 对于管理员，如果他们列出问题，他们可能会看到详细信息。
+    // 如果需要，我会添加 deleteAnswer 以保持完整性。
     public boolean deleteAnswer(int id) {
         String sql = "DELETE FROM answers WHERE id = ?";
         Connection conn = null;

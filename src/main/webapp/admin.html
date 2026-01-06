@@ -160,7 +160,7 @@
     </div>
 
     <div class="main-content">
-        <!-- Courses -->
+        <!-- 课程 -->
         <div id="courses" class="view-section active">
             <div class="page-title">课程管理</div>
             <div class="md3-card">
@@ -188,7 +188,7 @@
             </table>
         </div>
 
-        <!-- Teachers -->
+        <!-- 教师 -->
         <div id="teachers" class="view-section">
             <div class="page-title">教师管理</div>
             <div class="md3-card">
@@ -221,7 +221,7 @@
             </table>
         </div>
 
-        <!-- Resources -->
+        <!-- 资源 -->
         <div id="resources" class="view-section">
             <div class="page-title">资源审核</div>
             <table class="data-table">
@@ -238,7 +238,7 @@
             </table>
         </div>
 
-        <!-- Questions -->
+        <!-- 问答 -->
         <div id="questions" class="view-section">
             <div class="page-title">问答审核</div>
             <table class="data-table">
@@ -258,7 +258,7 @@
     <script>
         function handleLogout() {
             if (window.location.protocol === 'file:') {
-                window.location.href = 'index.html'; // Local mock redirect
+                window.location.href = 'index.html'; // 本地模拟重定向
             } else {
                 location.href = 'auth/logout';
             }
@@ -274,14 +274,14 @@
         }
 
         function populate(data) {
-            // Courses
+            // 课程
             const cTable = document.getElementById('courseTable');
             cTable.innerHTML = '';
             data.courses.forEach(c => {
                 cTable.innerHTML += `<tr><td>${c.id}</td><td>${c.name}</td><td>${c.teacherName || '-'}</td><td><button class="md3-button-outlined" style="padding:4px 12px; color:red; border-color:red;" onclick="deleteItem('course', ${c.id})">删除</button></td></tr>`;
             });
 
-            // Teachers
+            // 教师
             const tTable = document.getElementById('teacherTable');
             const tSelect = document.getElementById('courseTeacherSelect');
             tTable.innerHTML = '';
@@ -291,7 +291,7 @@
                 tSelect.innerHTML += `<option value="${t.id}">${t.fullName} (${t.username})</option>`;
             });
 
-            // Resources
+            // 资源
             const rTable = document.getElementById('resourceTable');
             if (data.resources && rTable) {
                 rTable.innerHTML = '';
@@ -300,7 +300,7 @@
                 });
             }
 
-            // Questions
+            // 问答
             const qTable = document.getElementById('questionsTable');
             if (data.questions && qTable) {
                 qTable.innerHTML = '';
@@ -322,7 +322,7 @@
         function deleteItem(type, id) {
             if (!confirm('确定吗？')) return;
             if (window.location.protocol === 'file:') {
-                document.querySelector('tr').remove(); // Visual mock
+                document.querySelector('tr').remove(); // 视觉模拟
                 return;
             }
             fetch('admin/' + type + '/delete?id=' + id, { method: 'POST' })

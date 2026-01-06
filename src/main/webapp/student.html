@@ -70,7 +70,7 @@
             color: var(--md-sys-color-primary);
             border-left: 4px solid var(--md-sys-color-primary);
             border-radius: 4px 16px 16px 4px;
-            /* Unique shape */
+            /* 独特形状 */
         }
 
         .user-profile {
@@ -228,14 +228,14 @@
         </div>
 
         <div class="user-profile">
-            <div class="user-avatar" id="userAvatar">S</div> <!-- Dynamic Initial -->
+            <div class="user-avatar" id="userAvatar">S</div> <!-- 动态首字母 -->
             <div style="font-size:14px; font-weight:600;" id="userFullName">Student</div>
             <div class="logout-btn" onclick="handleLogout()">退出登录</div>
         </div>
     </div>
 
     <div class="main-content">
-        <!-- Resource Center -->
+        <!-- 资源中心 -->
         <div id="resources" class="view-section active">
             <div class="header-area">
                 <div class="page-title">探索资源</div>
@@ -246,7 +246,7 @@
                 </div>
             </div>
 
-            <!-- Enrollment Section -->
+            <!-- 选课部分 -->
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
                 <div class="md3-card">
                     <h3 style="margin-top:0;">我的课程</h3>
@@ -264,24 +264,24 @@
 
             <div id="searchResults"
                 style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;">
-                <!-- Content injected here -->
+                <!-- 内容在此注入 -->
                 <div class="md3-card" style="grid-column: 1/-1; text-align:center; padding: 48px; color:#888;">
                     输入关键词开启学习之旅。
                 </div>
             </div>
         </div>
 
-        <!-- Notifications -->
+        <!-- 通知 -->
         <div id="notifications" class="view-section">
             <div class="header-area">
                 <div class="page-title">通知中心</div>
             </div>
             <div id="notificationListContainer" style="display:flex; flex-direction:column; gap:16px;">
-                <!-- Filled by JS -->
+                <!-- 由 JS 填充 -->
             </div>
         </div>
 
-        <!-- Q&A -->
+        <!-- 问答 -->
         <div id="qa" class="view-section">
             <div class="header-area">
                 <div class="page-title">社区问答</div>
@@ -298,7 +298,7 @@
                         <select name="courseId" id="qaCourseSelect" class="md3-text-field" required>
                             <option value="" disabled selected>选择相关课程</option>
                         </select>
-                        <!-- Custom File Upload Button could go here, staying simple for now -->
+                        <!-- 自定义文件上传按钮可以放在这里，目前保持简单 -->
                         <div style="margin-bottom:16px;">
                             <label style="font-size:13px; color:#666; display:block; margin-bottom:8px;">附加图片（选填）</label>
                             <input type="file" name="image" class="md3-text-field" style="padding:10px;">
@@ -315,13 +315,13 @@
                         <button class="md3-button-outlined" onclick="searchQuestions()">搜索</button>
                     </div>
                     <div id="myQuestionsList" style="display:flex; flex-direction:column; gap:16px;">
-                        <!-- List -->
+                        <!-- 列表 -->
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- My Space -->
+        <!-- 我的空间 -->
         <div id="my-space" class="view-section">
             <div class="header-area">
                 <div class="page-title">我的仪表盘</div>
@@ -369,7 +369,7 @@
             </table>
         </div>
 
-        <!-- Profile -->
+        <!-- 个人资料 -->
         <div id="profile" class="view-section">
             <div class="header-area">
                 <div class="page-title">我的个人资料</div>
@@ -408,10 +408,10 @@
     </div>
 
     <script>
-        // Check for local file execution to warn about logout
+        // 检查本地文件执行以警告注销
         function handleLogout() {
             if (window.location.protocol === 'file:') {
-                MockAPI.logout(); // Use MockAPI logout
+                MockAPI.logout(); // 使用 MockAPI 注销
                 window.location.href = 'index.html';
             } else {
                 location.href = 'auth/logout';
@@ -420,12 +420,12 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             loadData();
-            // Auto-refresh every 3 seconds to simulate real-time sync
+            // 每 3 秒自动刷新以模拟实时同步
             setInterval(loadData, 3000);
         });
 
         function loadData() {
-            // Mock data if file protocol for UI testing
+            // 如果是用于 UI 测试的文件协议，则使用模拟数据
             if (window.location.protocol === 'file:') {
                 console.log("Running in local file mode (Mock Data)");
                 mockPopulate();
@@ -436,15 +436,13 @@
                 .then(res => res.json())
                 .then(data => {
                     updateUI(data);
-                    searchResources(); // Auto-load resources
+                    searchResources(); // 自动加载资源
                 })
                 .catch(err => console.error("Error loading data", err));
         }
 
         function updateUI(data) {
-            // Notifications
-            // Notifications
-            // Notifications
+            // 通知
             if (data.notifications > 0) {
                 const bad = document.getElementById('navBadge');
                 bad.style.display = 'inline-block';
@@ -470,23 +468,23 @@
                 }
             }
 
-            // Populate Enrollment Lists
+            // 填充选课列表
             const myCourses = document.getElementById('myCourseList');
             const availCourses = document.getElementById('availableCourseList');
             const qaSel = document.getElementById('qaCourseSelect');
             const upSel = document.getElementById('uploadCourseSelect');
             
-            // Save selection
+            // 保存选择
             const currentQaVal = qaSel.value;
             const currentUpVal = upSel.value;
 
-            // Clear
+            // 清除
             myCourses.innerHTML = '';
             availCourses.innerHTML = '';
             qaSel.innerHTML = '<option value="" disabled selected>选择相关课程</option>';
             upSel.innerHTML = '<option value="" disabled selected>选择课程</option>';
 
-            // Enrolled
+            // 已选
             if (data.enrolledCourses && data.enrolledCourses.length > 0) {
                 data.enrolledCourses.forEach(c => {
                     myCourses.innerHTML += `
@@ -495,7 +493,7 @@
                             <span class="material-icons-round" style="color:green; font-size:16px;">已选</span>
                         </li>`;
                     
-                    // Populate drop downs with enrolled courses only? Or all? Usually enrolled.
+                    // 下拉菜单只填充已选课程？还是所有？通常是已选课程。
                     let opt1 = document.createElement('option');
                     opt1.value = c.id;
                     opt1.textContent = c.name;
@@ -510,7 +508,7 @@
                 myCourses.innerHTML = '<li style="padding:12px; color:grey;">暂未选课。</li>';
             }
 
-            // Available
+            // 可选课程
              if (data.availableCourses && data.availableCourses.length > 0) {
                 data.availableCourses.forEach(c => {
                     availCourses.innerHTML += `
@@ -523,11 +521,11 @@
                 availCourses.innerHTML = '<li style="padding:12px; color:grey;">没有更多可选课程。</li>';
             }
 
-            // Restore selection if valid
+            // 如果有效则恢复选择
             if (currentQaVal) qaSel.value = currentQaVal;
             if (currentUpVal) upSel.value = currentUpVal;
 
-            // My Resources
+            // 我的资源
             const tb = document.getElementById('myResourcesTable');
             tb.innerHTML = '';
             data.myResources.forEach(r => {
@@ -544,7 +542,7 @@
                 </tr>`;
             });
 
-            // My Questions
+            // 我的问题
             const qList = document.getElementById('myQuestionsList');
             qList.innerHTML = '';
             data.myQuestions.forEach(q => {
@@ -564,13 +562,13 @@
                 </div>`;
             });
 
-            // Populate Profile
+            // 填充个人资料
             if (data.user) {
                 document.getElementById('pFullName').value = data.user.fullName || '';
                 document.getElementById('pEmail').value = data.user.email || '';
                 document.getElementById('pTitle').value = data.user.title || '';
                 document.getElementById('pBio').value = data.user.bio || '';
-                // Updates header as well
+                // 同时更新页眉
                 document.getElementById('userFullName').textContent = data.user.fullName || 'Student';
             }
         }
@@ -585,7 +583,7 @@
             const data = MockAPI.getStudentDashboard(user.id);
             updateUI(data);
 
-            // Initial blank search
+            // 初始空白搜索
             searchResources();
         }
 
@@ -596,7 +594,7 @@
                 renderResults(results);
                 return;
             }
-            // Native fetch...
+            // 原生 fetch...
             fetch('student/search?keyword=' + encodeURIComponent(k))
                 .then(res => res.json())
                 .then(data => renderResults(data));
@@ -626,7 +624,7 @@
 
         function handleDownload(id) {
             if (window.location.protocol === 'file:') {
-                // Find resource in Mock Data
+                // 在模拟数据中查找资源
                 const allResources = JSON.parse(localStorage.getItem("sl_resources") || "[]");
                 const r = allResources.find(res => res.id == id);
                 
@@ -643,7 +641,7 @@
                     URL.revokeObjectURL(url);
 
                     MockAPI.downloadResource(id);
-                    mockPopulate(); // Refresh counts
+                    mockPopulate(); // 刷新计数
                 } else {
                     alert('未找到资源 details');
                 }
@@ -679,7 +677,7 @@
                 .then(res => res.json())
                 .then(res => {
                     if(res.success) {
-                        loadData(); // Reload to update lists
+                        loadData(); // 重新加载以更新列表
                     }
                 });
         }
@@ -688,7 +686,7 @@
             document.querySelectorAll('.view-section').forEach(d => d.classList.remove('active'));
             document.getElementById(id).classList.add('active');
 
-            // Only toggle class for nav items that are passed
+            // 仅切换传递的导航项的类
             if (el) {
                 document.querySelectorAll('.nav-item').forEach(d => d.classList.remove('active'));
                 el.classList.add('active');
@@ -696,7 +694,7 @@
         }
 
         function handleLocalQuestion(event) {
-            // Attach this to the form if file protocol
+            // 如果是文件协议，将其附加到表单
             if (window.location.protocol === 'file:') {
                 event.preventDefault();
                 const user = MockAPI.getCurrentUser();
@@ -737,7 +735,7 @@
         }
 
         if (window.location.protocol === 'file:') {
-            // Hook forms
+            // 钩子表单
             document.querySelector('#qa form').setAttribute('onsubmit', 'return handleLocalQuestion(event)');
             document.querySelector('#uploadForm').setAttribute('onsubmit', 'return handleUpload(event)');
         }

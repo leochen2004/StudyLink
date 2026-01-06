@@ -86,7 +86,7 @@ public class AdminServlet extends HttpServlet {
         StringBuilder json = new StringBuilder();
         json.append("{");
 
-        // Courses
+        // 课程
         json.append("\"courses\": [");
         for (int i = 0; i < courses.size(); i++) {
             Course c = courses.get(i);
@@ -97,7 +97,7 @@ public class AdminServlet extends HttpServlet {
         }
         json.append("],");
 
-        // Teachers
+        // 教师
         json.append("\"teachers\": [");
         for (int i = 0; i < teachers.size(); i++) {
             User t = teachers.get(i);
@@ -108,7 +108,7 @@ public class AdminServlet extends HttpServlet {
         }
         json.append("],");
 
-        // Resources
+        // 资源
         json.append("\"resources\": [");
         for (int i = 0; i < resources.size(); i++) {
             Resource r = resources.get(i);
@@ -120,7 +120,7 @@ public class AdminServlet extends HttpServlet {
         }
         json.append("],");
 
-        // Questions
+        // 问答
         json.append("\"questions\": [");
         for (int i = 0; i < questions.size(); i++) {
             Question q = questions.get(i);

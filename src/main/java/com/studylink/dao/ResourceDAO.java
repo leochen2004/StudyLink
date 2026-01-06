@@ -180,8 +180,8 @@ public class ResourceDAO {
             pstmt.setString(5, r.getFilePath());
             pstmt.setString(6, r.getFileType());
             pstmt.setString(7, r.getVisibility());
-            pstmt.setString(8, "APPROVED"); // Teachers auto approved? Or PENDING? Task says "Teacher publishes
-                                            // resource", likely approved or auto. Admin moderates. Let's say APPROVED.
+            pstmt.setString(8, "APPROVED"); // 教师自动批准？还是待定？任务书说“教师发布
+                                            // 资源”，可能是已批准或自动批准。管理员进行适度管理。这里设为已批准。
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();

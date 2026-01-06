@@ -10,13 +10,13 @@ public class Answer {
     private String imagePath;
     private Timestamp createdAt;
 
-    // Display
+    // 显示
     private String teacherName;
 
     public Answer() {
     }
 
-    // Getters Setters
+    // Getter 和 Setter
     public int getId() {
         return id;
     }

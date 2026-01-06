@@ -1,11 +1,11 @@
 /**
- * Mock Data Service for StudyLink
- * Simulates a backend using localStorage to allow "real-time" interaction between
- * Student, Teacher, and Admin pages when running locally via file:// protocol.
+ * StudyLink 模拟数据服务
+ * 使用 localStorage 模拟后端，以便在通过 file:// 协议本地运行时，
+ * 允许学生、教师和管理员页面之间进行“实时”交互。
  */
 
 const MockAPI = {
-  // Initialize Data
+  // 初始化数据
   init: function () {
     if (!localStorage.getItem("sl_users")) {
       const users = [
@@ -81,17 +81,17 @@ const MockAPI = {
       localStorage.setItem("sl_notifications", JSON.stringify([]));
     }
 
-    // Session
+    // 会话
     if (!sessionStorage.getItem("sl_currentUser")) {
-      // Default to null
+      // 默认为 null
     }
   },
 
-  // Auth
+  // 认证
   login: function (username, password, role) {
     this.init();
     const users = JSON.parse(localStorage.getItem("sl_users"));
-    // Relaxed matching for demo ease: check if username exists and role matches (ignoring password for ease or simple check)
+    // 为了演示方便，进行宽松匹配：检查用户名是否存在且角色匹配（为了方便忽略密码或进行简单检查）
     const user = users.find((u) => u.username === username && u.role === role);
     if (user) {
       if (user.password === password) {
@@ -101,7 +101,7 @@ const MockAPI = {
         return { success: false, message: "密码错误" };
       }
     }
-    // Auto-create for demo if not found? No, let's strict.
+    // 如果未找到，为了演示自动创建？不，让我们严格一点。
     return { success: false, message: "用户未找到或角色不匹配" };
   },
 
@@ -125,7 +125,7 @@ const MockAPI = {
     sessionStorage.removeItem("sl_currentUser");
   },
 
-  // Student Actions
+  // 学生操作
   getStudentDashboard: function (studentId) {
     this.init();
     const resources = JSON.parse(localStorage.getItem("sl_resources"));
@@ -139,9 +139,9 @@ const MockAPI = {
     const myQs = questions.filter((q) => q.studentId === studentId);
     const myNotifs = notificationList.filter(
       (n) => n.userId === studentId && !n.read
-    ).length; // simple count
+    ).length; // 简单计数
 
-    // Add answerCount to qs
+    // 添加 answerCount 到 qs
     const formattedQs = myQs.map((q) => ({
       ...q,
       answerCount: q.answers ? q.answers.length : 0,
@@ -193,7 +193,7 @@ const MockAPI = {
     r.id = Date.now();
     r.courseName = course ? course.name : "未知";
     r.downloadCount = 0;
-    r.status = "APPROVED"; // Auto approve for demo
+    r.status = "APPROVED"; // 演示时自动批准
     r.type = "FILE";
     r.visibility = r.visibility || "PUBLIC";
 
@@ -211,16 +211,16 @@ const MockAPI = {
     }
   },
 
-  // Teacher Actions
+  // 教师操作
   getTeacherDashboard: function (teacherId) {
     this.init();
     const courses = JSON.parse(localStorage.getItem("sl_courses"));
     const questions = JSON.parse(localStorage.getItem("sl_questions"));
 
-    // Get courses taught by teacher (mock: all courses for id=2, or filtered)
-    // For demo, if teacherId matches stored courses
-    const myCourses = courses; // Simplify: Teacher sees all courses or filter by id if we saved it properly.
-    // Let's filter questions that have NO answers yet
+    // 获取教师讲授的课程（模拟：id=2 的所有课程，或过滤）
+    // 对于演示，如果 teacherId 匹配存储的课程
+    const myCourses = courses; // 简化：教师看到所有课程，或者如果我们正确保存了它，则按 ID 过滤。
+    // 让我们过滤掉还没有回答的问题
     const unanswered = questions.filter(
       (q) => !q.answers || q.answers.length === 0
     );
@@ -245,7 +245,7 @@ const MockAPI = {
       });
       localStorage.setItem("sl_questions", JSON.stringify(questions));
 
-      // Notify Student
+      // 通知学生
       const notifs = JSON.parse(localStorage.getItem("sl_notifications"));
       notifs.push({
         userId: q.studentId,
@@ -259,7 +259,7 @@ const MockAPI = {
     return false;
   },
 
-  // Admin Actions
+  // 管理员操作
   getAdminDashboard: function () {
     this.init();
     return {

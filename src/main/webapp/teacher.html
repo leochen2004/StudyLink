@@ -174,7 +174,7 @@
     </div>
 
     <div class="main-content">
-        <!-- Overview -->
+        <!-- 概览 -->
         <div id="overview" class="view-section active">
             <div class="page-title">教师概览</div>
             <div class="md3-card">
@@ -183,7 +183,7 @@
             </div>
         </div>
 
-        <!-- Publish -->
+        <!-- 发布 -->
         <div id="publish" class="view-section">
             <div class="page-title">发布资源</div>
             <div class="md3-card">
@@ -206,7 +206,7 @@
             </div>
         </div>
 
-        <!-- My Resources -->
+        <!-- 我的资源 -->
         <div id="my-resources" class="view-section">
             <div class="page-title">我的资源</div>
             <div class="md3-card">
@@ -226,7 +226,7 @@
             </div>
         </div>
 
-        <!-- Q&A -->
+        <!-- 问答 -->
         <div id="qa" class="view-section">
             <div class="page-title">问答管理</div>
             <div style="margin-bottom:20px; border-bottom:1px solid #ddd;">
@@ -241,7 +241,7 @@
         </div>
     </div>
 
-    <!-- Answer Modal -->
+    <!-- 回答模态框 -->
     <div id="answerModal"
         style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; z-index:100;">
         <div class="md3-card" style="width:500px; background:white;">
@@ -270,7 +270,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             loadData();
-            setInterval(loadData, 3000); // Real-time sync
+            setInterval(loadData, 3000); // 实时同步
         });
         function loadData() {
             if (window.location.protocol === 'file:') { mockData(); return; }
@@ -278,11 +278,11 @@
         }
 
         function populate(data) {
-            // Courses
+            // 课程
             const cl = document.getElementById('courseList');
             const ps = document.getElementById('publishCourseSelect');
             
-            // Save current selection
+            // 保存当前选择
             const currentPsVal = ps.value;
 
             cl.innerHTML = '';
@@ -292,13 +292,13 @@
                 ps.innerHTML += `<option value="${c.id}">${c.name}</option>`;
             });
 
-            // Restore selection
+            // 恢复选择
             if (currentPsVal) ps.value = currentPsVal;
 
             // Restore selection
             if (currentPsVal) ps.value = currentPsVal;
 
-            // My Resources
+            // 我的资源
             const myRl = document.getElementById('myResourcesList');
             if (myRl && data.myResources) {
                 if (data.myResources.length > 0) {
@@ -324,7 +324,7 @@
                 }
             }
 
-            // Questions
+            // 问答
             const ql = document.getElementById('unansweredList');
             ql.innerHTML = '';
             const count = data.unansweredQuestions.length;
@@ -343,13 +343,13 @@
                </div>`;
             });
 
-            // Questions (History)
+            // 问答（历史记录）
             const hl = document.getElementById('historyList');
             if (hl) {
                 hl.innerHTML = '';
                 if (data.answeredQuestions) {
                     data.answeredQuestions.forEach(q => {
-                        // Safe access to first answer or loop
+                        // 安全访问第一个回答或循环
                         let ansText = (q.answers && q.answers.length > 0) ? q.answers[0].content : '...';
                         let ansId = (q.answers && q.answers.length > 0) ? q.answers[0].id : 0;
 
@@ -371,12 +371,12 @@
 
         function handleVisibilityChange(resourceId, newVisibility) {
             if (window.location.protocol === 'file:') {
-               // Mock Update
+               // 模拟更新
                alert("Local simulation: Visibility changed to " + newVisibility);
                return;
             }
             
-            // Send POST request
+            // 发送 POST 请求
             const formData = new URLSearchParams();
             formData.append('resourceId', resourceId);
             formData.append('visibility', newVisibility);
@@ -389,7 +389,7 @@
                 body: formData
             })
             .then(() => {
-                loadData(); // Reload to confirm
+                loadData(); // 重新加载以确认
             })
             .catch(err => console.error(err));
         }
@@ -399,13 +399,13 @@
             if (!user) { window.location.href = 'index.html'; return; }
             document.querySelector('.user-profile div:nth-child(2)').textContent = user.fullName;
 
-            // Should add getAnsweredQuestions logic to MockAPI or filter here
+            // 应该添加 getAnsweredQuestions 逻辑到 MockAPI 或在此处过滤
             const allQs = JSON.parse(localStorage.getItem('sl_questions')) || [];
-            // Filter answered: Has answers
+            // 过滤已回答：有回答
             const answered = allQs.filter(q => q.answers && q.answers.length > 0);
 
             const data = MockAPI.getTeacherDashboard(user.id);
-            data.answeredQuestions = answered; // Augment data
+            data.answeredQuestions = answered; // 增强数据
 
             populate(data);
         }

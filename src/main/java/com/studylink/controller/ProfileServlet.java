@@ -27,22 +27,22 @@ public class ProfileServlet extends HttpServlet {
 
         String fullName = req.getParameter("fullName");
         String password = req.getParameter("password");
-        // String email = req.getParameter("email"); // If email was in the model
+        // String email = req.getParameter("email"); // 如果模型中有 email
 
         if (fullName != null && !fullName.trim().isEmpty()) {
             currentUser.setFullName(fullName);
         }
 
         if (password != null && !password.trim().isEmpty()) {
-            currentUser.setPassword(password); // In real app, hash this!
+            currentUser.setPassword(password); // 在实际应用中，对此进行哈希处理！
         }
 
         boolean success = userDAO.updateUser(currentUser);
 
         if (success) {
-            session.setAttribute("user", currentUser); // Update session
+            session.setAttribute("user", currentUser); // 更新会话
             resp.sendRedirect(req.getContextPath() + "/student.html");
-            // Note: Should redirect back to profile page or referring page
+            // 注意：应重定向回个人资料页面或引用页面
         } else {
             req.setAttribute("error", "Update failed");
             req.getRequestDispatcher("/profile.html").forward(req, resp);

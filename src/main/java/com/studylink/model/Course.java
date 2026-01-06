@@ -10,7 +10,7 @@ public class Course {
     private String department;
     private Timestamp createdAt;
 
-    // Extra field for display (Teacher Name)
+    // 用于显示的额外字段（教师姓名）
     private String teacherName;
 
     public Course() {

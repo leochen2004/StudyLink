@@ -12,7 +12,7 @@ public class DBUtil {
 
     static {
         try {
-            // Load db.properties from classpath
+            // 从 classpath 加载 db.properties
             InputStream input = DBUtil.class.getClassLoader().getResourceAsStream("db.properties");
             if (input == null) {
                 System.err.println("CRITICAL ERROR: db.properties not found in classpath!");
@@ -26,7 +26,7 @@ public class DBUtil {
             }
             Class.forName(driver);
 
-            // Try loading from .env.local
+            // 尝试从 .env.local 加载
             loadEnvLocal();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();

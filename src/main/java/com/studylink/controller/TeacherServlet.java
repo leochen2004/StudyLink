@@ -89,7 +89,7 @@ public class TeacherServlet extends HttpServlet {
         List<Course> courses = courseDAO.getCoursesByTeacher(user.getId());
         List<Question> questions = questionDAO.getQuestionsByTeacher(user.getId());
 
-        // Calculate unanswered count
+        // 计算未回答数量
         long unansweredCount = questions.stream().filter(q -> q.getAnswerCount() == 0).count();
 
         StringBuilder json = new StringBuilder();
@@ -106,7 +106,7 @@ public class TeacherServlet extends HttpServlet {
         }
         json.append("],");
 
-        // Split questions into answered and unanswered
+        // 将问题分为已回答和未回答
         json.append("\"unansweredQuestions\": [");
         boolean first = true;
         for (Question q : questions) {
@@ -123,7 +123,7 @@ public class TeacherServlet extends HttpServlet {
         }
         json.append("],");
 
-        // ... existing code ...
+        // ... 现有代码 ...
         json.append("\"answeredQuestions\": [");
         first = true;
         for (Question q : questions) {
@@ -155,7 +155,7 @@ public class TeacherServlet extends HttpServlet {
         }
         json.append("],");
 
-        // Add My Resources
+        // 添加“我的资源”
         List<Resource> myResources = resourceDAO.getResourcesByUploader(user.getId());
         json.append("\"myResources\": [");
         for (int i = 0; i < myResources.size(); i++) {
@@ -183,7 +183,7 @@ public class TeacherServlet extends HttpServlet {
     private void addResource(HttpServletRequest req, HttpServletResponse resp, User user)
             throws IOException, ServletException {
         req.setCharacterEncoding("UTF-8");
-        // Ensure multipart request is parsed
+        // 确保解析多部分请求
         if (req.getContentType() != null && req.getContentType().toLowerCase().contains("multipart/form-data")) {
             req.getParts();
         }
@@ -194,7 +194,7 @@ public class TeacherServlet extends HttpServlet {
         String visibility = req.getParameter("visibility"); // PUBLIC/PRIVATE
 
         if (courseIdStr == null || title == null) {
-            // Handle missing parameters
+            // 处理参数缺失
             resp.sendRedirect(req.getContextPath() + "/teacher.html?error=missing_params");
             return;
         }
@@ -207,7 +207,7 @@ public class TeacherServlet extends HttpServlet {
             return;
         }
 
-        // Use portable path relative to project root
+        // 使用相对于项目根目录的可移植路径
         String projectRoot = System.getProperty("user.dir");
         String uploadPath = projectRoot + java.io.File.separator + "src" + java.io.File.separator + "main"
                 + java.io.File.separator + "webapp" + java.io.File.separator + "uploads";
@@ -227,7 +227,7 @@ public class TeacherServlet extends HttpServlet {
                 savedFileName = uuid + "_" + fileName;
                 filePath = uploadPath + java.io.File.separator + savedFileName;
 
-                // Write file to disk
+                // 将文件写入磁盘
                 filePart.write(filePath);
 
                 if (fileName.toLowerCase().endsWith(".png") || fileName.toLowerCase().endsWith(".jpg"))
@@ -238,7 +238,7 @@ public class TeacherServlet extends HttpServlet {
                     fileType = "PDF";
             }
         } catch (Exception e) {
-            // Handle Multipart config issues in simulation or missing part
+            // 处理模拟环境中的多部分配置问题或缺失部分
             System.out.println("File upload upload logic failed: " + e.getMessage());
             e.printStackTrace();
         }
@@ -248,7 +248,7 @@ public class TeacherServlet extends HttpServlet {
         r.setDescription(desc);
         r.setCourseId(courseId);
         r.setUploaderId(user.getId());
-        r.setFilePath("uploads/" + savedFileName); // Store relative path
+        r.setFilePath("uploads/" + savedFileName); // 存储相对路径
         r.setFileType(fileType);
         r.setVisibility(visibility);
 
@@ -264,12 +264,11 @@ public class TeacherServlet extends HttpServlet {
         a.setQuestionId(questionId);
         a.setTeacherId(user.getId());
         a.setContent(content);
-        a.setImagePath(""); // Attachment support optional for answer text (requested "pure text + image",
-                            // treating image as optional)
+        a.setImagePath(""); // 答案文本的附件支持是可选的（要求“纯文本+图片”，将图片视为可选）
 
         questionDAO.addAnswer(a);
 
-        // Notify Student
+        // 通知学生
         Question q = questionDAO.getQuestionById(questionId);
         if (q != null) {
             notificationDAO.addNotification(q.getStudentId(), "NEW_ANSWER",
@@ -303,7 +302,7 @@ public class TeacherServlet extends HttpServlet {
         String idStr = req.getParameter("id");
         if (idStr != null) {
             try {
-                // In a real app, verify ownership
+                // 在实际应用中，验证所有权
                 questionDAO.deleteAnswer(Integer.parseInt(idStr));
             } catch (Exception e) {
             }
@@ -319,7 +318,7 @@ public class TeacherServlet extends HttpServlet {
         if (idStr != null && visibility != null) {
             try {
                 int resourceId = Integer.parseInt(idStr);
-                // In a real app, verify ownership (check if resource belongs to user)
+                // 在实际应用中，验证所有权（检查资源是否属于用户）
                 Resource r = resourceDAO.getResourceById(resourceId);
                 if (r != null && r.getUploaderId() == user.getId()) {
                     resourceDAO.updateVisibility(resourceId, visibility);

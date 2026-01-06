@@ -117,10 +117,10 @@
           const u = document.getElementById("username").value;
           const p = document.querySelector('input[type="password"]').value;
           
-          // For local file testing, we'll try to guess or use a default, 
-          // or ideally MockAPI should handle it. 
-          // Since we removed the selector, let's try to login as STUDENT by default for local testing
-          // or check if username contains 'admin' or 'teacher'.
+          // 对于本地文件测试，我们将尝试猜测或使用默认值，
+          // 或者理想情况下 MockAPI 应该处理它。
+          // 既然我们删除了选择器，让我们尝试默认为 STUDENT 进行本地测试
+          // 或者检查用户名是否包含 'admin' 或 'teacher'。
           let role = "STUDENT";
           if (u.includes("admin")) role = "ADMIN";
           else if (u.includes("teacher")) role = "TEACHER";

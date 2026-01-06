@@ -90,7 +90,7 @@ public class AuthServlet extends HttpServlet {
 
     private void handleLogin(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String username = req.getParameter("username");
-        String password = req.getParameter("password"); // Plain text as per task simplicity
+        String password = req.getParameter("password"); // 根据任务简化要求使用明文
 
         User user = userDAO.login(username, password);
 
@@ -98,8 +98,8 @@ public class AuthServlet extends HttpServlet {
             HttpSession session = req.getSession();
             session.setAttribute("user", user);
 
-            // Redirect based on role
-            // Ideally we redirect to a dashboard servlet, but for now specific pages
+            // 根据角色重定向
+            // 理想情况下我们重定向到一个仪表盘 Servlet，但现在先重定向到特定页面
             if ("ADMIN".equals(user.getRole())) {
                 resp.sendRedirect(req.getContextPath() + "/admin.html");
             } else if ("TEACHER".equals(user.getRole())) {
@@ -120,7 +120,7 @@ public class AuthServlet extends HttpServlet {
         String password = req.getParameter("password");
         String fullName = req.getParameter("fullName");
         String email = req.getParameter("email");
-        String role = "STUDENT"; // Default registration is student
+        String role = "STUDENT"; // 默认注册为学生
 
         if (userDAO.checkUsernameExists(username)) {
             resp.setContentType("text/html");

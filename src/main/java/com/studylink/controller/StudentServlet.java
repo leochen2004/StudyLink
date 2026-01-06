@@ -45,14 +45,12 @@ public class StudentServlet extends HttpServlet {
             return null;
         }
         User user = (User) session.getAttribute("user");
-        // Teachers/Admins could technically act as students or view this, but strict
-        // role check:
+        // 教师/管理员技术上可以扮演学生或查看此内容，但进行严格的角色检查：
         if (!"STUDENT".equals(user.getRole())) {
             // resp.sendError(HttpServletResponse.SC_FORBIDDEN);
             // return null;
-            // Relaxed: A teacher might want to see student view? Requirement says "Student
-            // Module".
-            // Let's enforce Student.
+            // 宽松策略：教师可能想查看学生视图？需求说明书称之为“学生模块”。
+            // 让我们强制要求学生角色。
         }
         return user;
     }
@@ -101,7 +99,7 @@ public class StudentServlet extends HttpServlet {
         if (idStr != null) {
             try {
                 int id = Integer.parseInt(idStr);
-                // Verify ownership
+                // 验证所有权
                 Resource r = resourceDAO.getResourceById(id);
                 if (r != null && r.getUploaderId() == user.getId()) {
                     resourceDAO.deleteResource(id);
@@ -118,7 +116,7 @@ public class StudentServlet extends HttpServlet {
         if (idStr != null) {
             try {
                 int id = Integer.parseInt(idStr);
-                // Verify ownership
+                // 验证所有权
                 Question q = questionDAO.getQuestionById(id);
                 if (q != null && q.getStudentId() == user.getId()) {
                     questionDAO.deleteQuestion(id);
@@ -154,7 +152,7 @@ public class StudentServlet extends HttpServlet {
         List<Course> enrolledCourses = courseDAO.getEnrolledCourses(user.getId());
         List<Course> allCourses = courseDAO.getAllCourses();
 
-        // available = all - enrolled
+        // 可选课程 = 所有课程 - 已选课程
         List<Integer> enrolledIds = new ArrayList<>();
         for (Course c : enrolledCourses)
             enrolledIds.add(c.getId());
@@ -169,7 +167,7 @@ public class StudentServlet extends HttpServlet {
         StringBuilder json = new StringBuilder();
         json.append("{");
 
-        // User Profile Data
+        // 用户个人资料数据
         json.append("\"user\": {");
         json.append("\"id\":").append(user.getId()).append(",");
         json.append("\"username\":\"").append(user.getUsername()).append("\",");
@@ -258,13 +256,13 @@ public class StudentServlet extends HttpServlet {
 
     private void searchResources(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String keyword = req.getParameter("keyword");
-        User user = checkStudent(req, resp); // Ensure user is logged in for visibility check
+        User user = checkStudent(req, resp); // 确保用户已登录以进行可见性检查
         if (user == null)
             return;
 
         List<Resource> resources = resourceDAO.getStudentVisibleResources(user.getId());
 
-        // Filter in memory by keyword
+        // 在内存中按关键字过滤
         List<Resource> filtered = new ArrayList<>();
         String k = (keyword != null ? keyword.toLowerCase() : "");
         for (Resource r : resources) {
@@ -298,8 +296,8 @@ public class StudentServlet extends HttpServlet {
         String description = req.getParameter("description");
         int courseId = Integer.parseInt(req.getParameter("courseId"));
 
-        // Use absolute path to ensure files are saved in the project source directory
-        // and persist across restarts/builds.
+        // 使用绝对路径确保文件保存在项目源目录中
+        // 并在重启/构建后持久存在。
         String uploadPath = "/Users/liangchen0920/workspace/webDev/StudyLink/src/main/webapp/uploads";
         java.io.File uploadDir = new java.io.File(uploadPath);
         if (!uploadDir.exists())
@@ -317,13 +315,13 @@ public class StudentServlet extends HttpServlet {
                 savedFileName = uuid + "_" + fileName;
                 filePath = uploadPath + java.io.File.separator + savedFileName;
 
-                // Write file to disk
+                // 将文件写入磁盘
                 filePart.write(filePath);
 
-                // Store relative path or identifying info?
-                // Storing absolute path for simplicity in this session,
-                // or just the filename if we always recreate the dir path.
-                // Let's store the full path to avoid ambiguity in download.
+                // 存储相对路径或标识信息？
+                // 在本次会话中存储绝对路径以便于简单处理，
+                // 或者如果我们总是重新创建目录路径，则只存储文件名。
+                // 让我们存储完整路径以避免下载时出现歧义。
 
                 if (fileName.toLowerCase().endsWith(".png") || fileName.toLowerCase().endsWith(".jpg"))
                     fileType = "IMAGE";
@@ -341,7 +339,7 @@ public class StudentServlet extends HttpServlet {
         r.setDescription(description);
         r.setCourseId(courseId);
         r.setUploaderId(user.getId());
-        r.setFilePath("uploads/" + savedFileName); // Store relative path for portability
+        r.setFilePath("uploads/" + savedFileName); // 存储相对路径以实现可移植性
         r.setFileType(fileType);
         r.setVisibility("PUBLIC");
         r.setStatus("APPROVED");
@@ -356,7 +354,7 @@ public class StudentServlet extends HttpServlet {
         String title = req.getParameter("title");
         String content = req.getParameter("content");
 
-        // Image logic
+        // 图片逻辑
         String imagePath = "";
         try {
             Part filePart = req.getPart("image");
@@ -383,17 +381,17 @@ public class StudentServlet extends HttpServlet {
             try {
                 int id = Integer.parseInt(idStr);
 
-                // Security Check: Verify User
+                // 安全检查：验证用户
                 User user = checkStudent(req, resp);
                 if (user == null) {
-                    // checkStudent handles redirect/error
+                    // checkStudent 处理重定向/错误
                     return;
                 }
 
                 Resource r = resourceDAO.getResourceById(id);
 
                 if (r != null) {
-                    // Security Check: Visibility
+                    // 安全检查：可见性
                     if ("PRIVATE".equals(r.getVisibility())) {
                         List<Course> enrolled = courseDAO.getEnrolledCourses(user.getId());
                         boolean isEnrolled = false;
@@ -415,13 +413,13 @@ public class StudentServlet extends HttpServlet {
                     if (r.getFilePath() != null && !r.getFilePath().isEmpty()) {
                         java.io.File file;
                         if (r.getFilePath().startsWith("uploads")) {
-                            // Resolve relative path
+                            // 解析相对路径
                             String projectRoot = System.getProperty("user.dir");
                             String webappRoot = projectRoot + java.io.File.separator + "src" + java.io.File.separator
                                     + "main" + java.io.File.separator + "webapp";
                             file = new java.io.File(webappRoot, r.getFilePath());
                         } else {
-                            // Legacy absolute path support
+                            // 传统绝对路径支持
                             file = new java.io.File(r.getFilePath());
                         }
 
@@ -433,22 +431,22 @@ public class StudentServlet extends HttpServlet {
                             resp.setContentType(mimeType);
                             resp.setContentLength((int) file.length());
 
-                            // Extract original filename for download
+                            // 提取原始文件名以供下载
                             String originalName = file.getName();
-                            // UUID_Filename -> Filename
+                            // UUID_文件名 -> 文件名
                             int underscoreIndex = originalName.indexOf('_');
                             if (underscoreIndex != -1) {
                                 originalName = originalName.substring(underscoreIndex + 1);
                             }
 
                             String headerKey = "Content-Disposition";
-                            // Encode filename for browser compatibility
+                            // 为浏览器兼容性编码文件名
                             String encodedName = java.net.URLEncoder.encode(originalName, "UTF-8").replace("+", "%20");
                             String headerValue = String.format("attachment; filename=\"%s\"; filename*=UTF-8''%s",
                                     encodedName, encodedName);
                             resp.setHeader(headerKey, headerValue);
 
-                            // Stream file
+                            // 文件流
                             try (java.io.FileInputStream inStream = new java.io.FileInputStream(file);
                                     java.io.OutputStream outStream = resp.getOutputStream()) {
 
@@ -460,7 +458,7 @@ public class StudentServlet extends HttpServlet {
                                 }
                             }
                         } else {
-                            // Fallback for older/mock resources without real files
+                            // 针对没有真实文件的旧/模拟资源的回退
                             serveDummyFile(resp, r);
                         }
                     } else {
@@ -479,7 +477,7 @@ public class StudentServlet extends HttpServlet {
     }
 
     private void serveDummyFile(HttpServletResponse resp, Resource r) throws IOException {
-        String safeName = r.getTitle().replaceAll("[^a-zA-Z0-9._\\-\\u4e00-\\u9fa5]", "_"); // Allow Chinese
+        String safeName = r.getTitle().replaceAll("[^a-zA-Z0-9._\\-\\u4e00-\\u9fa5]", "_"); // 允许中文
         String encodedName = java.net.URLEncoder.encode(safeName, "UTF-8").replace("+", "%20");
         String filename = encodedName + ".txt";
 
@@ -498,7 +496,7 @@ public class StudentServlet extends HttpServlet {
         StringBuilder json = new StringBuilder("[");
         for (int i = 0; i < questions.size(); i++) {
             Question q = questions.get(i);
-            // We might want answer count or basic info for search results
+            // 我们可能想要搜索结果的回答计数或基本信息
             json.append(String.format(
                     "{\"id\":%d, \"title\":\"%s\", \"courseName\":\"%s\", \"studentName\":\"%s\", \"answerCount\":%d}",
                     q.getId(), q.getTitle(), q.getCourseName(), q.getStudentName(), q.getAnswerCount()));

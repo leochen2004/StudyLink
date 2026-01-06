@@ -15,7 +15,7 @@ public class Resource {
     private String status; // APPROVED, PENDING, REJECTED
     private Timestamp createdAt;
 
-    // Display fields
+    // 显示字段
     private String uploaderName;
     private String courseName;
 
