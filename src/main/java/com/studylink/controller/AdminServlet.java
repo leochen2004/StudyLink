@@ -113,8 +113,8 @@ public class AdminServlet extends HttpServlet {
         for (int i = 0; i < resources.size(); i++) {
             Resource r = resources.get(i);
             json.append(String.format(
-                    "{\"id\":%d, \"title\":\"%s\", \"courseName\":\"%s\", \"uploaderName\":\"%s\", \"status\":\"%s\"}",
-                    r.getId(), r.getTitle(), r.getCourseName(), r.getUploaderName(), r.getStatus()));
+                    "{\"id\":%d, \"title\":\"%s\", \"courseName\":\"%s\", \"uploaderName\":\"%s\", \"status\":\"%s\", \"fileType\":\"%s\"}",
+                    r.getId(), r.getTitle(), r.getCourseName(), r.getUploaderName(), r.getStatus(), r.getFileType()));
             if (i < resources.size() - 1)
                 json.append(",");
         }
