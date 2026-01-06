@@ -23,6 +23,7 @@ public class AuthServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.setCharacterEncoding("UTF-8");
         String pathInfo = req.getPathInfo();
         if ("/login".equals(pathInfo)) {
             handleLogin(req, resp);
